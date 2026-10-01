@@ -25,5 +25,33 @@ async function checkDirectory(directory) {
     if (entry.isDirectory()) await checkDirectory(join(directory, entry.name));
   }
 }
+// La cinta: misma verificacion de recursos y anclas que la portada.
+const cinta = await readFile(join(base, 'cinta', 'index.html'), 'utf8');
+const cintaJs = await readFile(join(base, 'cinta', 'cinta.js'), 'utf8');
+const cintaIds = [...cinta.matchAll(/id="([^"]+)"/g)].map(match => match[1]);
+assert.equal(cintaIds.length, new Set(cintaIds).size, 'IDs duplicados en /cinta');
+for (const match of cinta.matchAll(/href="#([^"]+)"/g)) assert(cintaIds.includes(match[1]), `Ancla inexistente en /cinta: ${match[1]}`);
+// cleanUrls sirve /ruta desde /ruta/index.html, asi que una ruta puede ser
+// un archivo o un directorio con index.html dentro.
+async function existeRuta(ruta) {
+  for (const candidato of [ruta, join(ruta, 'index.html'), ruta + '.html']) {
+    try {
+      if ((await stat(join(base, candidato))).isFile()) return true;
+    } catch {}
+  }
+  return false;
+}
+for (const match of cinta.matchAll(/(?:src|href)="(\/[^"?#]*)"/g)) {
+  assert(await existeRuta(match[1]), `Falta recurso en /cinta: ${match[1]}`);
+}
+// La CSP del sitio es style-src 'self' y script-src 'self': nada en linea.
+assert(!/\sstyle="/.test(cinta), 'Estilo en linea en /cinta: lo bloquea la CSP');
+assert(!/<style[\s>]|<script(?![^>]*\ssrc=)/.test(cinta), 'CSS o JS en linea en /cinta: lo bloquea la CSP');
+// font-src 'self': las fuentes se auto-alojan, nunca Google Fonts.
+assert(!/fonts\.(googleapis|gstatic)\.com/.test(cinta + cintaJs), 'Fuente externa en /cinta: la bloquea la CSP');
+for (const match of (await readFile(join(base, 'cinta', 'cinta.css'), 'utf8')).matchAll(/url\('([^']+)'\)/g)) {
+  assert((await stat(join(base, match[1]))).isFile(), `Falta fuente: ${match[1]}`);
+}
+
 await checkDirectory(base);
 console.log('OK: anclas, recursos, seis casos, once imágenes, contactos y límites editoriales.');

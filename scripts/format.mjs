@@ -295,6 +295,8 @@ const objetivos = [
   { ruta: join(raiz, 'public', 'index.html'), formatear: formatearHtml },
   { ruta: join(raiz, 'public', 'design.css'), formatear: formatearCss },
   { ruta: join(raiz, 'public', 'revision.css'), formatear: formatearCss },
+  { ruta: join(raiz, 'public', 'cinta', 'index.html'), formatear: formatearHtml },
+  { ruta: join(raiz, 'public', 'cinta', 'cinta.css'), formatear: formatearCss },
 ];
 
 const soloVerificar = process.argv.includes('--check');
