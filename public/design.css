@@ -3817,3 +3817,96 @@ dialog::backdrop {
     font-size:15px
   }
 }
+/* ---------------------------------------------------------------------------
+   Metricas — fase 2.
+
+   Cifras tomadas del CV de David. El lima (--lime) queda reservado a numeros:
+   es el unico lugar del sitio donde aparece, de modo que un dato duro se
+   reconoce sin leerlo.
+   --------------------------------------------------------------------------- */
+
+.hero-metrics {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:28px;
+  margin:0 0 34px;
+  padding-top:30px;
+  border-top:1px solid var(--line)
+}
+
+.hero-metrics div {
+  display:flex;
+  flex-direction:column;
+  gap:7px
+}
+
+.hero-metrics dt {
+  font-size:38px;
+  line-height:1;
+  font-weight:500;
+  color:var(--lime);
+  font-variant-numeric:tabular-nums
+}
+
+.hero-metrics dd {
+  margin:0;
+  font-size:14px;
+  line-height:1.4;
+  color:var(--muted)
+}
+
+.hero-metrics dd span {
+  display:block;
+  color:#7f90a8
+}
+
+.case-metrics {
+  display:flex;
+  flex-wrap:wrap;
+  gap:28px;
+  margin:16px 0 18px;
+  padding:0
+}
+
+.case-metrics div {
+  display:flex;
+  flex-direction:column;
+  gap:4px
+}
+
+.case-metrics dt {
+  font-size:28px;
+  line-height:1;
+  font-weight:500;
+  color:var(--lime);
+  font-variant-numeric:tabular-nums
+}
+
+.case-metrics dd {
+  margin:0;
+  font-size:13px;
+  line-height:1.4;
+  color:var(--muted)
+}
+
+@media (max-width:1000px) {
+  .hero-metrics {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:22px
+  }
+  .hero-metrics dt {
+    font-size:32px
+  }
+}
+
+@media (max-width:600px) {
+  .hero-metrics {
+    gap:18px
+  }
+  .hero-metrics dt {
+    font-size:27px
+  }
+  .case-metrics {
+    gap:20px
+  }
+}
