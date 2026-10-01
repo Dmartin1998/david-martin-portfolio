@@ -6,7 +6,11 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "format": "node scripts/format.mjs",
+    "format:check": "node scripts/format.mjs --check",
+    "snapshot": "node scripts/snapshot.cjs",
+    "verify": "npm run format:check && npm run check"
   },
   "engines": {
     "node": "24.x"
