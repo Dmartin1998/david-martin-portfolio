@@ -348,10 +348,10 @@ export async function montar(lienzo, alTerminar) {
 
   const pantalla = crearPantalla();
   const plano = new THREE.Mesh(
-    new THREE.PlaneGeometry(t.x * 0.655, t.y * 0.62),
+    new THREE.PlaneGeometry(t.x * 0.627, t.y * 0.652),
     new THREE.MeshBasicMaterial({ map: pantalla.tex, toneMapped: false })
   );
-  const TUBO = new THREE.Vector3(-t.x * 0.126, BASE_VCR + ALTO_VCR + t.y * 0.515, t.z * 0.49);
+  const TUBO = new THREE.Vector3(-t.x * 0.0994, BASE_VCR + ALTO_VCR + t.y * 0.565, t.z * 0.468);
   plano.position.copy(TUBO);
   soporte.add(plano);
   brillo.position.set(TUBO.x, TUBO.y, TUBO.z + 0.55);
