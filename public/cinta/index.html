@@ -25,17 +25,49 @@
     <header class="bar" id="bar"><a class="bar-sig" href="/cinta" aria-label="David Martín, inicio">David Martín</a>
       <span class="tc" id="tc" aria-label="Año en curso">00:20:00</span></header>
     <div class="stage" id="stage" aria-hidden="true">
-      <div id="sigwrap">
-        <div class="sig" id="sig">David Martín</div>
-        <div class="sig-rule" id="rule"></div>
-      </div>
-      <div class="tape" id="tape">
-        <div class="lab">
-          <div class="lab-top">VHS · T-120 · SP</div>
-          <div class="lab-sig">David Martín</div>
-          <div class="lab-yr">2020 — 2026</div>
+      <div class="world" id="world">
+        <div class="sigbox" id="sigbox"><svg class="sigsvg" viewBox="0 0 620 150" role="img" aria-label="Firma de David Martín">
+            <defs>
+              <clipPath id="wipe"><rect id="wiperect" x="0" y="0" width="0" height="150"></rect></clipPath>
+            </defs>
+            <text class="sigtext" x="10" y="105" clip-path="url(#wipe)">David Martín</text>
+            <rect class="sigline" id="sigline" x="14" y="124" width="0" height="2"></rect>
+          </svg></div>
+        <div class="rig" id="rig">
+          <div class="tv">
+            <div class="tv-side tv-left"></div>
+            <div class="tv-side tv-right"></div>
+            <div class="tv-side tv-top"></div>
+            <div class="tv-face">
+              <div class="tv-screen" id="screen">
+                <div class="tv-static" id="static"></div>
+                <div class="tv-bars" id="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+              <div class="tv-chin"><span class="tv-brand">TRINITON</span><span class="tv-knob"></span><span class="tv-knob"></span></div>
+            </div>
+          </div>
+          <div class="vcr">
+            <div class="vcr-top"></div>
+            <div class="vcr-face">
+              <div class="vcr-slot" id="slot"></div>
+              <div class="vcr-panel"><span class="vcr-led" id="led"></span>
+                <span class="vcr-disp" id="disp">--:--</span>
+                <span class="vcr-btns"><i></i><i></i><i></i></span></div>
+            </div>
+          </div>
         </div>
-        <div class="reels"><span class="reel" id="r1"></span><span class="tapeline"></span><span class="reel" id="r2"></span></div>
+        <div class="cassette" id="cassette">
+          <div class="cas-top">
+            <div class="cas-label"><span class="cas-sig">David Martín</span>
+              <span class="cas-meta">VHS · T-120 · SP &nbsp;·&nbsp; 2020—2026</span></div>
+          </div>
+          <div class="cas-front">
+            <div class="cas-window"><span class="cas-reel"></span>
+              <span class="cas-tape"></span>
+              <span class="cas-reel"></span></div>
+          </div>
+          <div class="cas-edge"></div>
+        </div>
       </div>
     </div>
     <button class="skip" id="skip" type="button">SALTEAR ▸▸</button>

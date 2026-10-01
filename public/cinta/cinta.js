@@ -12,43 +12,93 @@
   var stage = $('stage'), bar = $('bar'), radio = $('radio'), skip = $('skip');
 
   /* ------------------------------------------------------------ apertura */
+  // Secuencia: la firma se escribe, se vuelve etiqueta del casete, la camara
+  // retrocede hasta ver el equipo, el casete entra en la videograbadora, la
+  // tele enciende y la camara entra en la pantalla.
+  // Solo se ve una vez por sesion: a la vuelta, el contenido aparece directo.
 
   var revealed = false;
+  var relojes = [];
+
+  function luego(ms, fn) { relojes.push(setTimeout(fn, ms)); }
+
   function reveal() {
     if (revealed) return;
     revealed = true;
+    relojes.forEach(clearTimeout);
     stage.classList.add('gone');
     bar.classList.add('on');
     radio.classList.add('on');
     skip.hidden = true;
+    try { sessionStorage.setItem('cinta-vista', '1'); } catch (e) {}
+    luego(700, function () { stage.hidden = true; });
     tick();
   }
 
   skip.addEventListener('click', reveal);
 
-  if (reduce) {
+  var yaVista = false;
+  try { yaVista = sessionStorage.getItem('cinta-vista') === '1'; } catch (e) {}
+
+  if (reduce || yaVista) {
     reveal();
   } else {
-    $('sig').classList.add('draw');
-    $('rule').classList.add('draw');
-    setTimeout(function () {
-      var w = $('sigwrap');
-      w.style.transition = 'opacity .35s';
-      w.style.opacity = '0';
-    }, 1900);
-    setTimeout(function () {
-      $('tape').classList.add('on');
-      $('r1').classList.add('spin');
-      $('r2').classList.add('spin');
-    }, 2050);
-    setTimeout(function () { $('tape').classList.add('load'); }, 3000);
-    setTimeout(reveal, 3900);
+    var world = $('world'), sigbox = $('sigbox'), wiperect = $('wiperect'),
+        sigline = $('sigline'), rig = $('rig'), cassette = $('cassette'),
+        slot = $('slot'), led = $('led'), disp = $('disp'),
+        estatica = $('static'), barras = $('bars');
+
+    // 0.0 — la firma se escribe (barrido sobre el trazo)
+    wiperect.animate(
+      [{ width: '0px' }, { width: '640px' }],
+      { duration: 1500, easing: 'cubic-bezier(.5,.05,.3,1)', fill: 'forwards' }
+    );
+    luego(1250, function () {
+      sigline.animate(
+        [{ width: '0px' }, { width: '470px' }],
+        { duration: 480, easing: 'ease-out', fill: 'forwards' }
+      );
+    });
+
+    // 1.9 — la firma se apaga y aparece el casete con ella en la etiqueta
+    luego(1900, function () { sigbox.classList.add('gone'); });
+    luego(2150, function () { cassette.classList.add('on'); });
+
+    // 2.5 — la camara retrocede y revela el equipo completo
+    luego(2500, function () {
+      world.classList.add('pullback');
+      rig.classList.add('on');
+    });
+
+    // 3.6 — se abre la ranura y el casete entra
+    luego(3600, function () { slot.classList.add('open'); });
+    luego(3750, function () { cassette.classList.add('insert'); });
+
+    // 5.2 — clac: cierra la ranura, enciende el LED y arranca el contador
+    luego(5200, function () {
+      slot.classList.remove('open');
+      led.classList.add('on');
+      disp.classList.add('on');
+      disp.textContent = '00:00';
+      estatica.classList.add('on');
+    });
+
+    // 5.8 — barras de color
+    luego(5800, function () {
+      estatica.classList.remove('on');
+      barras.classList.add('on');
+    });
+
+    // 6.3 — la camara entra en la pantalla y corta a negro antes del contenido
+    luego(6300, function () { world.classList.add('pushin'); });
+    luego(7250, function () { $('screen').classList.add('black'); });
+    luego(7500, reveal);
   }
 
   // Si alguien baja antes de que termine, la apertura se corta sola.
   window.addEventListener('scroll', function () {
     if (!revealed && window.scrollY > 40) reveal();
-  }, { passive: true, once: false });
+  }, { passive: true });
 
   /* -------------------------------- timecode y limpieza progresiva de ruido */
 
