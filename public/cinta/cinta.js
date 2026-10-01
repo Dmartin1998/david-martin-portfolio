@@ -44,12 +44,9 @@
   if (reduce || yaVista) {
     reveal();
   } else {
-    var world = $('world'), sigbox = $('sigbox'), wiperect = $('wiperect'),
-        sigline = $('sigline'), rig = $('rig'), cassette = $('cassette'),
-        slot = $('slot'), led = $('led'), disp = $('disp'),
-        estatica = $('static'), barras = $('bars');
+    var sigbox = $('sigbox'), wiperect = $('wiperect'), sigline = $('sigline');
 
-    // 0.0 — la firma se escribe (barrido sobre el trazo)
+    // 0.0 — la firma se escribe
     wiperect.animate(
       [{ width: '0px' }, { width: '800px' }],
       { duration: 1500, easing: 'cubic-bezier(.5,.05,.3,1)', fill: 'forwards' }
@@ -61,40 +58,33 @@
       );
     });
 
-    // 1.9 — la firma se apaga y aparece el casete con ella en la etiqueta
-    luego(1900, function () { sigbox.classList.add('gone'); });
-    luego(2150, function () { cassette.classList.add('on'); });
+    // 2.1 — se apaga la firma y entra la escena en 3D.
+    // Si no hay WebGL, si el modulo no carga o si tarda demasiado, se entra
+    // directo: la intro nunca puede ser la razon de que nadie vea el sitio.
+    var respaldo = setTimeout(reveal, 9000);
+    relojes.push(respaldo);
 
-    // 2.5 — la camara retrocede y revela el equipo completo
-    luego(2500, function () {
-      world.classList.add('pullback');
-      rig.classList.add('on');
+    luego(2100, function () {
+      var lienzo = $('gl');
+      var hayGL = (function () {
+        try {
+          return !!document.createElement('canvas').getContext('webgl2');
+        } catch (e) { return false; }
+      })();
+      if (!hayGL) { reveal(); return; }
+
+      import('/cinta/3d/escena3d.js')
+        .then(function (mod) { return mod.montar(lienzo, reveal); })
+        .then(function (escena) {
+          if (revealed) { escena.detener(); return; }
+          sigbox.classList.add('gone');
+          lienzo.classList.add('on');
+          clearTimeout(respaldo);
+          relojes.push(setTimeout(reveal, 14000));
+          return escena.secuencia();
+        })
+        .catch(function () { reveal(); });
     });
-
-    // 3.6 — se abre la ranura y el casete entra
-    luego(3600, function () { slot.classList.add('open'); });
-    luego(3750, function () { cassette.classList.add('insert'); });
-
-    // 5.2 — clac: cierra la ranura, enciende el LED y arranca el contador
-    luego(5200, function () {
-      slot.classList.remove('open');
-      led.classList.add('on');
-      disp.classList.add('on');
-      disp.textContent = '00:00';
-      estatica.classList.add('on');
-    });
-
-    // 5.8 — barras de color
-    luego(5800, function () {
-      estatica.classList.remove('on');
-      barras.classList.add('on');
-    });
-
-    // 6.3 — la camara entra en la pantalla y corta a negro antes del contenido
-    luego(6300, function () { world.classList.add('pushin'); });
-    // corte a negro: se apagan las barras y queda el fondo del tubo
-    luego(7400, function () { $('bars').classList.remove('on'); });
-    luego(7640, reveal);
   }
 
   // Si alguien baja antes de que termine, la apertura se corta sola.

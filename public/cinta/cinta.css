@@ -267,214 +267,23 @@ a {
 .sigline {
   fill: var(--phos);
 }
-/* ---- el equipo y el casete, dibujados ---- */
-/* Ilustracion de trazo en vez de cajas con sombras. El medio-fotorrealismo
-   caia en el valle inquietante: un dibujo asumido no tiene ese problema, pesa
-   6 KB, escala sin perder nitidez y se puede dibujar solo como la firma. */
+/* ---- la escena en 3D ---- */
+/* El equipo es Television_01 de Poly Haven (CC0, Gabriel Radic) y la
+   videograbadora y el casete son geometria propia, para que compartan
+   material y luz con el modelo. */
 
-.rig {
+.gl {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 440px;
-  height: auto;
-  translate: -50% -50%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
   opacity: 0;
-  transition: opacity 0.8s ease;
-  overflow: visible;
+  transition: opacity 0.9s ease;
 }
 
-.rig.on {
+.gl.on {
   opacity: 1;
-}
-.rig-body,
-.rig-depth,
-.cas-body,
-
-.cas-depth {
-  fill: none;
-  stroke: var(--phos);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.rig-depth,
-
-.cas-depth {
-  stroke: var(--faint);
-  stroke-width: 1.5;
-}
-
-.rig-grille {
-  stroke: var(--faint);
-  stroke-width: 15;
-  stroke-dasharray: 2 4;
-  stroke-linecap: butt;
-}
-
-.rig-slot {
-  fill: #000;
-  stroke: var(--dim);
-  transition: height 0.25s ease, y 0.25s ease;
-}
-
-.rig-slot.open {
-  height: 26px;
-  y: 398px;
-}
-
-.rig-led {
-  fill: #2a1010;
-  stroke: var(--faint);
-  stroke-width: 1.5;
-  transition: fill 0.2s;
-}
-
-.rig-led.on {
-  fill: var(--rec);
-  stroke: var(--rec);
-}
-
-.rig-disp {
-  stroke: #1b3524;
-  stroke-width: 7;
-  stroke-linecap: butt;
-  transition: stroke 0.25s;
-}
-
-.rig-disp.on {
-  stroke: var(--green);
-}
-
-.rig-btn {
-  stroke: var(--faint);
-  stroke-width: 5;
-  stroke-linecap: butt;
-}
-
-.scr-off {
-  fill: #07070a;
-}
-
-.scr-static {
-  opacity: 0;
-  stroke: var(--phos);
-  stroke-width: 5;
-  stroke-linecap: butt;
-  stroke-dasharray: 3 2 9 4 2 7 5 3;
-}
-
-.scr-static.on {
-  opacity: 0.38;
-  animation: snow 0.09s steps(2) infinite;
-}
-
-@keyframes snow {
-  50% {
-    transform: translate(7px, 4px);
-  }
-}
-
-.scr-bars {
-  opacity: 0;
-  transition: opacity 0.2s steps(2);
-}
-
-.scr-bars.on {
-  opacity: 1;
-}
-
-.scr-bars .b1 {
-  fill: #bdbdbd;
-}
-
-.scr-bars .b2 {
-  fill: #bdbd3a;
-}
-
-.scr-bars .b3 {
-  fill: #3abdbd;
-}
-
-.scr-bars .b4 {
-  fill: #3abd3a;
-}
-
-.scr-bars .b5 {
-  fill: #bd3abd;
-}
-
-.scr-bars .b6 {
-  fill: #bd3a3a;
-}
-
-.scr-bars .b7 {
-  fill: #3a3abd;
-}
-/* ---- el casete ---- */
-
-.cassette {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 270px;
-  height: auto;
-  margin: -79px 0 0 -135px;
-  transform: translate3d(0, -52px, 300px) rotateX(46deg) rotateZ(-5deg);
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  overflow: visible;
-}
-
-.cassette.on {
-  opacity: 1;
-}
-
-.cassette.insert {
-  animation: insertar 1.6s cubic-bezier(0.5, 0, 0.3, 1) forwards;
-}
-
-@keyframes insertar {
-  38% {
-    transform: translate3d(0, 38px, 170px) rotateX(22deg) rotateZ(0deg) scale(0.92);
-    opacity: 1;
-  }
-  70% {
-    transform: translate3d(0, 142px, 26px) rotateX(5deg) rotateZ(0deg) scale(0.6);
-    opacity: 1;
-  }
-  88% {
-    transform: translate3d(0, 148px, 4px) rotateX(3deg) rotateZ(0deg) scale3d(0.6, 0.24, 0.6);
-    opacity: 1;
-  }
-  100% {
-    transform: translate3d(0, 150px, -10px) rotateX(2deg) rotateZ(0deg) scale3d(0.6, 0.03, 0.6);
-    opacity: 0;
-  }
-}
-
-.cas-label {
-  fill: var(--label);
-  stroke: var(--label);
-}
-
-.cas-ribbon {
-  stroke: var(--dim);
-  stroke-width: 7;
-  stroke-linecap: butt;
-}
-
-.cas-sig {
-  font-family: Firma, cursive;
-  font-size: 40px;
-  fill: var(--ink);
-}
-
-.cas-meta {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.08em;
-  fill: #8a8273;
 }
 
 .skip {

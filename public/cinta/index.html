@@ -28,63 +28,7 @@
     <div class="stage" id="stage" aria-hidden="true">
       <div class="world" id="world">
         <div class="sigbox" id="sigbox"><svg class="sigsvg" viewBox="0 0 800 190" role="img" aria-label="Firma de David Martín"><defs><clipPath id="wipe"><rect id="wiperect" x="0" y="0" width="0" height="190"></rect></clipPath></defs><text class="sigtext" x="400" y="118" text-anchor="middle" clip-path="url(#wipe)">David Martín</text><rect class="sigline" id="sigline" x="400" y="146" width="0" height="2"></rect></svg></div>
-        <svg class="rig" id="rig" viewBox="0 0 460 500" role="img" aria-label="Televisor de tubo sobre videograbadora">
-          <g class="rig-depth">
-            <path d="M32 18 L46 6 H452 L440 18" />
-            <path d="M452 6 V356 L440 368" />
-            <path d="M40 386 L52 376 H444 L432 386" />
-            <path d="M444 376 V462 L432 472" />
-          </g>
-          <g class="rig-body">
-            <rect x="20" y="14" width="420" height="354" rx="16" />
-            <rect x="42" y="36" width="376" height="282" rx="26" />
-            <path d="M58 345 h180" class="rig-grille" />
-            <circle cx="370" cy="344" r="13" />
-            <circle cx="404" cy="344" r="13" />
-            <rect x="28" y="384" width="404" height="92" rx="10" />
-            <rect x="52" y="402" width="356" height="18" rx="4" class="rig-slot" id="slot" />
-            <circle cx="66" cy="448" r="5" class="rig-led" id="led" />
-            <path d="M86 448 h86" class="rig-disp" id="disp" />
-            <path d="M344 448 h16 M372 448 h16 M400 448 h16" class="rig-btn" />
-          </g>
-          <g class="rig-screen">
-            <clipPath id="tubo"><rect x="50" y="44" width="360" height="266" rx="20" /></clipPath>
-            <g clip-path="url(#tubo)">
-              <rect x="50" y="44" width="360" height="266" class="scr-off" />
-              <g class="scr-static" id="static">
-                <path d="M50 60 h360 M50 92 h360 M50 124 h360 M50 156 h360 M50 188 h360 M50 220 h360 M50 252 h360 M50 284 h360" />
-              </g>
-              <g class="scr-bars" id="bars">
-                <rect x="50" y="44" width="52" height="266" class="b1" />
-                <rect x="102" y="44" width="52" height="266" class="b2" />
-                <rect x="154" y="44" width="52" height="266" class="b3" />
-                <rect x="206" y="44" width="52" height="266" class="b4" />
-                <rect x="258" y="44" width="52" height="266" class="b5" />
-                <rect x="310" y="44" width="52" height="266" class="b6" />
-                <rect x="362" y="44" width="48" height="266" class="b7" />
-              </g>
-            </g>
-          </g>
-        </svg>
-
-        <svg class="cassette" id="cassette" viewBox="0 0 300 176" role="img" aria-label="Casete VHS rotulado a mano">
-          <g class="cas-depth">
-            <path d="M14 10 L26 2 H288 L276 10" />
-            <path d="M288 2 V160 L276 168" />
-          </g>
-          <g class="cas-body">
-            <rect x="6" y="8" width="282" height="160" rx="7" />
-            <rect x="20" y="22" width="254" height="74" rx="3" class="cas-label" />
-            <rect x="20" y="106" width="254" height="48" rx="3" />
-            <circle cx="70" cy="130" r="19" />
-            <circle cx="70" cy="130" r="6" />
-            <circle cx="224" cy="130" r="19" />
-            <circle cx="224" cy="130" r="6" />
-            <path d="M90 130 h114" class="cas-ribbon" />
-          </g>
-          <text class="cas-sig" x="147" y="66" text-anchor="middle">David Martín</text>
-          <text class="cas-meta" x="147" y="86" text-anchor="middle">VHS · T-120 · SP · 2020—2026</text>
-        </svg>
+        <canvas class="gl" id="gl"></canvas>
       </div>
     </div>
     <button class="skip" id="skip" type="button">SALTEAR ▸▸</button>
