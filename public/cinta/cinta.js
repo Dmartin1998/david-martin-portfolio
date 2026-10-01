@@ -51,12 +51,12 @@
 
     // 0.0 — la firma se escribe (barrido sobre el trazo)
     wiperect.animate(
-      [{ width: '0px' }, { width: '640px' }],
+      [{ width: '0px' }, { width: '800px' }],
       { duration: 1500, easing: 'cubic-bezier(.5,.05,.3,1)', fill: 'forwards' }
     );
     luego(1250, function () {
       sigline.animate(
-        [{ width: '0px' }, { width: '470px' }],
+        [{ width: '0px', x: '400px' }, { width: '560px', x: '120px' }],
         { duration: 480, easing: 'ease-out', fill: 'forwards' }
       );
     });
@@ -92,8 +92,8 @@
 
     // 6.3 — la camara entra en la pantalla y corta a negro antes del contenido
     luego(6300, function () { world.classList.add('pushin'); });
-    luego(7250, function () { $('screen').classList.add('black'); });
-    luego(7500, reveal);
+    luego(7400, function () { $('screen').classList.add('black'); });
+    luego(7640, reveal);
   }
 
   // Si alguien baja antes de que termine, la apertura se corta sola.

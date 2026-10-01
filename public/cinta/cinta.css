@@ -232,8 +232,8 @@ a {
 }
 
 .world.pushin {
-  transform: translateZ(900px) rotateX(0deg);
-  transition: transform 1.4s cubic-bezier(0.6, 0, 0.78, 1);
+  transform: translate3d(0, 67px, 920px) rotateX(0deg);
+  transition: transform 1.05s cubic-bezier(0.5, 0, 0.72, 1);
 }
 /* ---- la firma ---- */
 
@@ -242,7 +242,7 @@ a {
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  width: min(620px, 86vw);
+  width: min(760px, 90vw);
   transition: opacity 0.45s ease, scale 0.6s ease;
 }
 
@@ -564,16 +564,20 @@ a {
 }
 
 @keyframes insertar {
-  40% {
-    transform: translate3d(0, 24px, 178px) rotateX(16deg) rotateZ(0deg);
+  38% {
+    transform: translate3d(0, 46px, 170px) rotateX(22deg) rotateZ(0deg) scale(0.92);
     opacity: 1;
   }
-  78% {
-    transform: translate3d(0, 168px, 34px) rotateX(3deg) rotateZ(0deg) scale(0.72);
+  70% {
+    transform: translate3d(0, 196px, 26px) rotateX(5deg) rotateZ(0deg) scale(0.58);
+    opacity: 1;
+  }
+  88% {
+    transform: translate3d(0, 202px, 4px) rotateX(3deg) rotateZ(0deg) scale3d(0.58, 0.26, 0.58);
     opacity: 1;
   }
   100% {
-    transform: translate3d(0, 176px, -42px) rotateX(2deg) rotateZ(0deg) scale(0.68);
+    transform: translate3d(0, 204px, -10px) rotateX(2deg) rotateZ(0deg) scale3d(0.58, 0.04, 0.58);
     opacity: 0;
   }
 }
