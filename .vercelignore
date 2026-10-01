@@ -1,0 +1,10 @@
+.vercel-auth
+qa
+research
+node_modules
+README.md
+SOURCES.md
+HANDOFF.md
+scripts/qa*
+*.zip
+dist

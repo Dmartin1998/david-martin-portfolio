@@ -1,0 +1,8 @@
+dist/
+.vercel/
+.vercel-auth/
+node_modules/
+qa/
+*.log
+
+.vercel
