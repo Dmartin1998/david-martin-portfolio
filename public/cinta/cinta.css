@@ -136,10 +136,28 @@ a {
   pointer-events: none;
   z-index: 59;
   background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.8) 100%);
-  opacity: calc(0.35 + 0.65 * var(--noise));
+  opacity: calc(0.22 + 0.58 * var(--noise));
   transition: opacity 0.3s linear;
 }
 /* ------------------------------------------------------------- barra fija */
+/* El tubo no desaparece al pasar a la navegacion: seguis adentro de la tele.
+   La sombra exterior gigante pinta de negro todo lo que queda fuera del radio,
+   asi las esquinas curvas del vidrio son reales y no un dibujo encima. */
+
+.crt {
+  position: fixed;
+  inset: 10px;
+  z-index: 58;
+  pointer-events: none;
+  border-radius: 30px / 24px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  box-shadow: 0 0 0 100vmax #000, inset 0 0 0 1px rgba(214, 226, 240, 0.16), inset 0 0 0 4px rgba(0, 0, 0, 0.95), inset 0 0 40px 14px rgba(0, 0, 0, 0.85), inset 0 0 150px 34px rgba(0, 0, 0, 0.55), inset 0 3px 2px rgba(255, 255, 255, 0.06);
+}
+
+.crt.on {
+  opacity: 1;
+}
 
 .bar {
   position: fixed;
@@ -269,14 +287,14 @@ a {
 .tv {
   position: relative;
   width: 430px;
-  height: 330px;
+  height: 378px;
   transform-style: preserve-3d;
 }
 
 .tv-face {
   position: absolute;
   inset: 0;
-  background: linear-gradient(162deg, #2c2c31 0%, #1b1b1e 55%, #121214 100%);
+  background: linear-gradient(162deg, #4b4a46 0%, #3a3935 48%, #26251f 100%);
   border-radius: 15px;
   padding: 18px 18px 0;
   box-shadow: 0 44px 74px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.07);
@@ -284,12 +302,12 @@ a {
 
 .tv-side {
   position: absolute;
-  background: #0e0e10;
+  background: #2b2a26;
 }
 
 .tv-left {
   width: 48px;
-  height: 330px;
+  height: 378px;
   left: 0;
   top: 0;
   transform: translateX(-48px) rotateY(-74deg);
@@ -299,12 +317,12 @@ a {
 
 .tv-right {
   width: 48px;
-  height: 330px;
+  height: 378px;
   right: 0;
   top: 0;
   transform: translateX(48px) rotateY(74deg);
   transform-origin: left center;
-  background: #0a0a0c;
+  background: #211f1c;
   border-radius: 0 13px 13px 0;
 }
 
@@ -315,18 +333,26 @@ a {
   top: 0;
   transform: translateY(-46px) rotateX(72deg);
   transform-origin: center bottom;
-  background: #242428;
+  background: #55534d;
   border-radius: 13px 13px 0 0;
 }
 
 .tv-screen {
   position: relative;
   width: 100%;
-  height: 252px;
+  height: 295px;
   border-radius: 28px / 21px;
   background: #050506;
   overflow: hidden;
   box-shadow: inset 0 0 46px rgba(0, 0, 0, 0.95), inset 0 0 0 3px #0a0a0c, 0 0 0 1px #303035;
+}
+
+.tv-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse 60% 44% at 32% 16%, rgba(255, 255, 255, 0.11), transparent 62%);
 }
 
 .tv-static {
@@ -406,19 +432,25 @@ a {
   padding: 0 4px;
 }
 
-.tv-brand {
+.tv-grille {
   flex: 1;
+  height: 22px;
+  background: repeating-linear-gradient(90deg, #2e2d29 0 2px, #45443f 2px 4px);
+  border-radius: 2px;
+}
+
+.tv-brand {
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: 0.3em;
-  color: #55555c;
+  letter-spacing: 0.26em;
+  color: #8d8a80;
 }
 
 .tv-knob {
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #4a4a51, #232327);
+  background: radial-gradient(circle at 35% 30%, #6e6b62, #312f2a);
 }
 
 .vcr {
@@ -437,14 +469,14 @@ a {
   top: 0;
   transform: translateY(-42px) rotateX(74deg);
   transform-origin: center bottom;
-  background: #1e1e21;
+  background: #514f49;
   border-radius: 8px 8px 0 0;
 }
 
 .vcr-face {
   position: absolute;
   inset: 0;
-  background: linear-gradient(175deg, #2b2b2f, #141416);
+  background: linear-gradient(175deg, #46453f, #272621);
   border-radius: 8px;
   padding: 12px 16px;
   box-shadow: 0 28px 46px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -503,20 +535,22 @@ a {
 .vcr-btns i {
   width: 15px;
   height: 7px;
-  background: #3a3a40;
+  background: #6a675e;
   border-radius: 2px;
 }
 /* ---- el casete ---- */
+/* Un VHS se reconoce por la ventana de los carretes en la cara de ARRIBA,
+   justo debajo de la etiqueta. Esa es la silueta; el frente es solo la tapa. */
 
 .cassette {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 290px;
-  height: 164px;
-  margin: -82px 0 0 -145px;
+  width: 300px;
+  height: 172px;
+  margin: -86px 0 0 -150px;
   transform-style: preserve-3d;
-  transform: translate3d(0, -26px, 300px) rotateX(62deg) rotateZ(-7deg);
+  transform: translate3d(0, -40px, 300px) rotateX(48deg) rotateZ(-6deg);
   opacity: 0;
   transition: opacity 0.5s ease;
 }
@@ -531,15 +565,15 @@ a {
 
 @keyframes insertar {
   40% {
-    transform: translate3d(0, 22px, 180px) rotateX(18deg) rotateZ(0deg);
+    transform: translate3d(0, 24px, 178px) rotateX(16deg) rotateZ(0deg);
     opacity: 1;
   }
   78% {
-    transform: translate3d(0, 126px, 36px) rotateX(3deg) rotateZ(0deg) scale(0.74);
+    transform: translate3d(0, 168px, 34px) rotateX(3deg) rotateZ(0deg) scale(0.72);
     opacity: 1;
   }
   100% {
-    transform: translate3d(0, 134px, -40px) rotateX(2deg) rotateZ(0deg) scale(0.7);
+    transform: translate3d(0, 176px, -42px) rotateX(2deg) rotateZ(0deg) scale(0.68);
     opacity: 0;
   }
 }
@@ -547,17 +581,20 @@ a {
 .cas-top {
   position: absolute;
   inset: 0;
-  background: linear-gradient(170deg, #35302a, #221e19);
-  border-radius: 5px;
-  padding: 13px;
-  box-shadow: 0 32px 54px rgba(0, 0, 0, 0.72);
+  background: linear-gradient(168deg, #2e2a25 0%, #1d1a16 100%);
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 34px 56px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .cas-label {
-  height: 100%;
+  flex: 0 0 50%;
   background: var(--label);
   border-radius: 2px;
-  padding: 12px 14px;
+  padding: 9px 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -566,69 +603,90 @@ a {
 
 .cas-sig {
   font-family: Firma, cursive;
-  font-size: 46px;
+  font-size: 40px;
   line-height: 0.78;
   color: var(--ink);
 }
 
 .cas-meta {
   font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: 7.5px;
   letter-spacing: 0.1em;
   color: #8a8273;
-  margin-top: 11px;
+  margin-top: 7px;
   border-top: 1px solid #d6cfc0;
-  padding-top: 7px;
+  padding-top: 5px;
+}
+
+.cas-window {
+  flex: 1;
+  background: linear-gradient(170deg, #241f1a, #0d0a08);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 18px;
+  box-shadow: inset 0 0 0 1px #3b352c, inset 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.cas-hub {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #b9b2a4, #6d665a);
+  border: 2px solid #d3ccbc;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.cas-hub i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #1a1510;
+  box-shadow: 0 0 0 3px #e6dfcd, 0 0 0 4px #6d665a;
+}
+
+.cas-ribbon {
+  flex: 1;
+  height: 16px;
+  background: linear-gradient(#6b5333, #3a2c1a);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .cas-front {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: 290px;
-  height: 32px;
-  background: linear-gradient(#1a1713, #0e0c0a);
+  width: 300px;
+  height: 34px;
+  background: linear-gradient(#211d18, #0f0d0a);
   transform: rotateX(-90deg);
   transform-origin: center bottom;
-  border-radius: 0 0 5px 5px;
-  padding: 6px 32px;
+  border-radius: 0 0 4px 4px;
+  padding: 6px 10px;
 }
 
-.cas-window {
+.cas-flap {
+  display: block;
   height: 100%;
-  background: #07060a;
+  background: linear-gradient(#2a251e, #16120d);
   border-radius: 2px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0 9px;
-  box-shadow: inset 0 0 0 1px #2b261f;
-}
-
-.cas-reel {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  border: 3px solid #4a423a;
-  background: #19150f;
-}
-
-.cas-tape {
-  flex: 1;
-  height: 7px;
-  background: #241d14;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 .cas-edge {
   position: absolute;
   left: 0;
   top: 0;
-  width: 290px;
-  height: 32px;
-  background: #15120e;
-  transform: translateY(-32px) rotateX(90deg);
+  width: 300px;
+  height: 34px;
+  background: #16130f;
+  transform: translateY(-34px) rotateX(90deg);
   transform-origin: center bottom;
-  border-radius: 5px 5px 0 0;
+  border-radius: 4px 4px 0 0;
 }
 
 .skip {

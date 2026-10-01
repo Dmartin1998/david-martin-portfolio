@@ -27,6 +27,7 @@
     revealed = true;
     relojes.forEach(clearTimeout);
     stage.classList.add('gone');
+    $('crt').classList.add('on');
     bar.classList.add('on');
     radio.classList.add('on');
     skip.hidden = true;
