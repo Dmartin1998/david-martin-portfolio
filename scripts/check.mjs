@@ -53,5 +53,13 @@ for (const match of (await readFile(join(base, 'cinta', 'cinta.css'), 'utf8')).m
   assert((await stat(join(base, match[1]))).isFile(), `Falta fuente: ${match[1]}`);
 }
 
+// Todo elemento que busque el JS de /cinta tiene que existir en su HTML.
+// Una referencia huerfana no rompe la pagina al cargar: revienta a mitad de la
+// animacion, que es justo donde nadie esta mirando el inspector.
+for (const match of cintaJs.matchAll(/\$\('([\w-]+)'\)/g)) {
+  const id = match[1];
+  assert(cinta.includes('id="' + id + '"'), `cinta.js busca #${id}, que no existe en el HTML`);
+}
+
 await checkDirectory(base);
 console.log('OK: anclas, recursos, seis casos, once imágenes, contactos y límites editoriales.');

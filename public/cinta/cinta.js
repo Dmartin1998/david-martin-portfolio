@@ -92,7 +92,8 @@
 
     // 6.3 — la camara entra en la pantalla y corta a negro antes del contenido
     luego(6300, function () { world.classList.add('pushin'); });
-    luego(7400, function () { $('screen').classList.add('black'); });
+    // corte a negro: se apagan las barras y queda el fondo del tubo
+    luego(7400, function () { $('bars').classList.remove('on'); });
     luego(7640, reveal);
   }
 

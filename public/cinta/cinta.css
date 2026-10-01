@@ -267,292 +267,163 @@ a {
 .sigline {
   fill: var(--phos);
 }
-/* ---- el equipo: tele de tubo sobre videograbadora ---- */
+/* ---- el equipo y el casete, dibujados ---- */
+/* Ilustracion de trazo en vez de cajas con sombras. El medio-fotorrealismo
+   caia en el valle inquietante: un dibujo asumido no tiene ese problema, pesa
+   6 KB, escala sin perder nitidez y se puede dibujar solo como la firma. */
 
 .rig {
   position: absolute;
   left: 50%;
   top: 50%;
+  width: 440px;
+  height: auto;
   translate: -50% -50%;
-  width: 430px;
-  transform-style: preserve-3d;
   opacity: 0;
   transition: opacity 0.8s ease;
+  overflow: visible;
 }
 
 .rig.on {
   opacity: 1;
 }
+.rig-body,
+.rig-depth,
+.cas-body,
 
-.tv {
-  position: relative;
-  width: 430px;
-  height: 378px;
-  transform-style: preserve-3d;
+.cas-depth {
+  fill: none;
+  stroke: var(--phos);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rig-depth,
+
+.cas-depth {
+  stroke: var(--faint);
+  stroke-width: 1.5;
 }
 
-.tv-face {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(162deg, #4b4a46 0%, #3a3935 48%, #26251f 100%);
-  border-radius: 15px;
-  padding: 18px 18px 0;
-  box-shadow: 0 44px 74px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+.rig-grille {
+  stroke: var(--faint);
+  stroke-width: 15;
+  stroke-dasharray: 2 4;
+  stroke-linecap: butt;
 }
 
-.tv-side {
-  position: absolute;
-  background: #2b2a26;
+.rig-slot {
+  fill: #000;
+  stroke: var(--dim);
+  transition: height 0.25s ease, y 0.25s ease;
 }
 
-.tv-left {
-  width: 48px;
-  height: 378px;
-  left: 0;
-  top: 0;
-  transform: translateX(-48px) rotateY(-74deg);
-  transform-origin: right center;
-  border-radius: 13px 0 0 13px;
+.rig-slot.open {
+  height: 26px;
+  y: 398px;
 }
 
-.tv-right {
-  width: 48px;
-  height: 378px;
-  right: 0;
-  top: 0;
-  transform: translateX(48px) rotateY(74deg);
-  transform-origin: left center;
-  background: #211f1c;
-  border-radius: 0 13px 13px 0;
+.rig-led {
+  fill: #2a1010;
+  stroke: var(--faint);
+  stroke-width: 1.5;
+  transition: fill 0.2s;
 }
 
-.tv-top {
-  width: 430px;
-  height: 46px;
-  left: 0;
-  top: 0;
-  transform: translateY(-46px) rotateX(72deg);
-  transform-origin: center bottom;
-  background: #55534d;
-  border-radius: 13px 13px 0 0;
+.rig-led.on {
+  fill: var(--rec);
+  stroke: var(--rec);
 }
 
-.tv-screen {
-  position: relative;
-  width: 100%;
-  height: 295px;
-  border-radius: 28px / 21px;
-  background: #050506;
-  overflow: hidden;
-  box-shadow: inset 0 0 46px rgba(0, 0, 0, 0.95), inset 0 0 0 3px #0a0a0c, 0 0 0 1px #303035;
+.rig-disp {
+  stroke: #1b3524;
+  stroke-width: 7;
+  stroke-linecap: butt;
+  transition: stroke 0.25s;
 }
 
-.tv-glass {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background: radial-gradient(ellipse 60% 44% at 32% 16%, rgba(255, 255, 255, 0.11), transparent 62%);
+.rig-disp.on {
+  stroke: var(--green);
 }
 
-.tv-static {
-  position: absolute;
-  inset: 0;
+.rig-btn {
+  stroke: var(--faint);
+  stroke-width: 5;
+  stroke-linecap: butt;
+}
+
+.scr-off {
+  fill: #07070a;
+}
+
+.scr-static {
   opacity: 0;
-  background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.17) 0 1px, transparent 1px 2px), repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 3px);
-  background-size: 100% 3px, 5px 100%;
+  stroke: var(--phos);
+  stroke-width: 5;
+  stroke-linecap: butt;
+  stroke-dasharray: 3 2 9 4 2 7 5 3;
 }
 
-.tv-static.on {
-  opacity: 1;
-  animation: snow 0.08s steps(2) infinite;
+.scr-static.on {
+  opacity: 0.38;
+  animation: snow 0.09s steps(2) infinite;
 }
 
 @keyframes snow {
   50% {
-    background-position: 2px 1px, 1px 2px;
+    transform: translate(7px, 4px);
   }
 }
 
-.tv-bars {
-  position: absolute;
-  inset: 0;
-  display: flex;
+.scr-bars {
   opacity: 0;
   transition: opacity 0.2s steps(2);
 }
 
-.tv-bars.on {
+.scr-bars.on {
   opacity: 1;
 }
-.tv-screen.black .tv-bars,
 
-.tv-screen.black .tv-static {
-  opacity: 0;
-  transition: opacity 0.18s linear;
+.scr-bars .b1 {
+  fill: #bdbdbd;
 }
 
-.tv-bars i {
-  flex: 1;
+.scr-bars .b2 {
+  fill: #bdbd3a;
 }
 
-.tv-bars i:nth-child(1) {
-  background: #bdbdbd;
+.scr-bars .b3 {
+  fill: #3abdbd;
 }
 
-.tv-bars i:nth-child(2) {
-  background: #bdbd3a;
+.scr-bars .b4 {
+  fill: #3abd3a;
 }
 
-.tv-bars i:nth-child(3) {
-  background: #3abdbd;
+.scr-bars .b5 {
+  fill: #bd3abd;
 }
 
-.tv-bars i:nth-child(4) {
-  background: #3abd3a;
+.scr-bars .b6 {
+  fill: #bd3a3a;
 }
 
-.tv-bars i:nth-child(5) {
-  background: #bd3abd;
-}
-
-.tv-bars i:nth-child(6) {
-  background: #bd3a3a;
-}
-
-.tv-bars i:nth-child(7) {
-  background: #3a3abd;
-}
-
-.tv-chin {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-
-.tv-grille {
-  flex: 1;
-  height: 22px;
-  background: repeating-linear-gradient(90deg, #2e2d29 0 2px, #45443f 2px 4px);
-  border-radius: 2px;
-}
-
-.tv-brand {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.26em;
-  color: #8d8a80;
-}
-
-.tv-knob {
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #6e6b62, #312f2a);
-}
-
-.vcr {
-  position: relative;
-  width: 430px;
-  height: 80px;
-  margin-top: 6px;
-  transform-style: preserve-3d;
-}
-
-.vcr-top {
-  position: absolute;
-  width: 430px;
-  height: 42px;
-  left: 0;
-  top: 0;
-  transform: translateY(-42px) rotateX(74deg);
-  transform-origin: center bottom;
-  background: #514f49;
-  border-radius: 8px 8px 0 0;
-}
-
-.vcr-face {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(175deg, #46453f, #272621);
-  border-radius: 8px;
-  padding: 12px 16px;
-  box-shadow: 0 28px 46px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.vcr-slot {
-  height: 15px;
-  background: #050506;
-  border-radius: 3px;
-  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.95);
-  transition: height 0.22s ease;
-}
-
-.vcr-slot.open {
-  height: 22px;
-}
-
-.vcr-panel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 11px;
-}
-
-.vcr-led {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #3a1010;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-
-.vcr-led.on {
-  background: var(--rec);
-  box-shadow: 0 0 10px var(--rec);
-}
-
-.vcr-disp {
-  flex: 1;
-  font-family: Tubo, var(--mono);
-  font-size: 17px;
-  color: #2f6b3f;
-  letter-spacing: 0.1em;
-}
-
-.vcr-disp.on {
-  color: var(--green);
-  text-shadow: 0 0 9px rgba(127, 224, 127, 0.5);
-}
-
-.vcr-btns {
-  display: flex;
-  gap: 5px;
-}
-
-.vcr-btns i {
-  width: 15px;
-  height: 7px;
-  background: #6a675e;
-  border-radius: 2px;
+.scr-bars .b7 {
+  fill: #3a3abd;
 }
 /* ---- el casete ---- */
-/* Un VHS se reconoce por la ventana de los carretes en la cara de ARRIBA,
-   justo debajo de la etiqueta. Esa es la silueta; el frente es solo la tapa. */
 
 .cassette {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 300px;
-  height: 172px;
-  margin: -86px 0 0 -150px;
-  transform-style: preserve-3d;
-  transform: translate3d(0, -40px, 300px) rotateX(48deg) rotateZ(-6deg);
+  width: 270px;
+  height: auto;
+  margin: -79px 0 0 -135px;
+  transform: translate3d(0, -52px, 300px) rotateX(46deg) rotateZ(-5deg);
   opacity: 0;
   transition: opacity 0.5s ease;
+  overflow: visible;
 }
 
 .cassette.on {
@@ -565,132 +436,45 @@ a {
 
 @keyframes insertar {
   38% {
-    transform: translate3d(0, 46px, 170px) rotateX(22deg) rotateZ(0deg) scale(0.92);
+    transform: translate3d(0, 38px, 170px) rotateX(22deg) rotateZ(0deg) scale(0.92);
     opacity: 1;
   }
   70% {
-    transform: translate3d(0, 196px, 26px) rotateX(5deg) rotateZ(0deg) scale(0.58);
+    transform: translate3d(0, 142px, 26px) rotateX(5deg) rotateZ(0deg) scale(0.6);
     opacity: 1;
   }
   88% {
-    transform: translate3d(0, 202px, 4px) rotateX(3deg) rotateZ(0deg) scale3d(0.58, 0.26, 0.58);
+    transform: translate3d(0, 148px, 4px) rotateX(3deg) rotateZ(0deg) scale3d(0.6, 0.24, 0.6);
     opacity: 1;
   }
   100% {
-    transform: translate3d(0, 204px, -10px) rotateX(2deg) rotateZ(0deg) scale3d(0.58, 0.04, 0.58);
+    transform: translate3d(0, 150px, -10px) rotateX(2deg) rotateZ(0deg) scale3d(0.6, 0.03, 0.6);
     opacity: 0;
   }
 }
 
-.cas-top {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(168deg, #2e2a25 0%, #1d1a16 100%);
-  border-radius: 4px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 34px 56px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+.cas-label {
+  fill: var(--label);
+  stroke: var(--label);
 }
 
-.cas-label {
-  flex: 0 0 50%;
-  background: var(--label);
-  border-radius: 2px;
-  padding: 9px 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  box-shadow: inset 0 0 0 1px #cdc6b6;
+.cas-ribbon {
+  stroke: var(--dim);
+  stroke-width: 7;
+  stroke-linecap: butt;
 }
 
 .cas-sig {
   font-family: Firma, cursive;
   font-size: 40px;
-  line-height: 0.78;
-  color: var(--ink);
+  fill: var(--ink);
 }
 
 .cas-meta {
   font-family: var(--mono);
-  font-size: 7.5px;
-  letter-spacing: 0.1em;
-  color: #8a8273;
-  margin-top: 7px;
-  border-top: 1px solid #d6cfc0;
-  padding-top: 5px;
-}
-
-.cas-window {
-  flex: 1;
-  background: linear-gradient(170deg, #241f1a, #0d0a08);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 18px;
-  box-shadow: inset 0 0 0 1px #3b352c, inset 0 2px 6px rgba(0, 0, 0, 0.9);
-}
-
-.cas-hub {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #b9b2a4, #6d665a);
-  border: 2px solid #d3ccbc;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-}
-
-.cas-hub i {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #1a1510;
-  box-shadow: 0 0 0 3px #e6dfcd, 0 0 0 4px #6d665a;
-}
-
-.cas-ribbon {
-  flex: 1;
-  height: 16px;
-  background: linear-gradient(#6b5333, #3a2c1a);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-
-.cas-front {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 300px;
-  height: 34px;
-  background: linear-gradient(#211d18, #0f0d0a);
-  transform: rotateX(-90deg);
-  transform-origin: center bottom;
-  border-radius: 0 0 4px 4px;
-  padding: 6px 10px;
-}
-
-.cas-flap {
-  display: block;
-  height: 100%;
-  background: linear-gradient(#2a251e, #16120d);
-  border-radius: 2px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-}
-
-.cas-edge {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 300px;
-  height: 34px;
-  background: #16130f;
-  transform: translateY(-34px) rotateX(90deg);
-  transform-origin: center bottom;
-  border-radius: 4px 4px 0 0;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  fill: #8a8273;
 }
 
 .skip {
