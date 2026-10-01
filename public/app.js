@@ -20,7 +20,7 @@ const cases = {
     problem: 'Campañas, ediciones y productos necesitaban una referencia operativa coherente. Preparar un nuevo programa partía de un formulario vacío y de pasos manuales.',
     intervention: ['Asistente para copiar una edición anterior o iniciar un programa nuevo, con imagen obligatoria y controles de consistencia.', 'Preparación de productos para tres empresas, reutilizando registros y configurando su cuenta y distribución analítica.', 'Publicación automática de productos nuevos del canal web. Conservación del estado de publicación de los existentes y de las demás empresas.'],
     role: 'Desarrollo y evolución funcional de Campaign Manager, con dirección de implementación y colaboración del equipo y herramientas de IA.',
-    metrics: [['+40%', 'captación mensual de leads'], ['−47%', 'costo por lead']],
+    metrics: [['+47%', 'captación mensual en ago–sep 2026'], ['−49%', 'costo de pauta por lead']],
     result: 'Flujo de catálogo multicompañía implementado y evolucionado el 18/09/2026. La evidencia posterior registra ejecución del asistente y ajustes de imagen, atribución analítica y publicación selectiva.',
     limit: 'La publicación automática aplica a productos nuevos del canal web; no fuerza la publicación de existentes ni de otras empresas. No se atribuye ahorro de tiempo sin una medición.',
     sources: ['Revisión e implementación del catálogo del 17/09/2026.', 'Evolución del 18/09/2026: imagen, plan analítico y publicación selectiva.', 'Código, historial y registro de ejecución del asistente contrastados con el trabajo en Claude.']
