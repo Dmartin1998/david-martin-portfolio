@@ -143,7 +143,7 @@ async function productionSmoke(browser) {
 (async()=>{
   if(process.env.QA_FINAL_ASSETS==='1') {
     const previous=JSON.parse(fs.readFileSync(path.join(out,'results.json'),'utf8'));
-    const paths=['/','/assets/social-card.png','/assets/social-card.svg','/assets/fonts/SpaceGrotesk-Variable.ttf'];
+    const paths=['/','/assets/social-card.png','/assets/social-card.svg','/assets/fonts/SpaceGrotesk-Variable.woff2'];
     const responses=await Promise.all(paths.map(async p=>{const r=await fetch(new URL(p,result.url));return {path:p,status:r.status,html:p==='/'?await r.text():null};}));
     const homepage=responses[0];
     previous.previousRequirementChecks=previous.checks.filter(c=>c.name==='Open Graph image absolute and reachable');

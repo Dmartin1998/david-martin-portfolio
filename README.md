@@ -89,3 +89,21 @@ confirmar su `display` en el CSS y comparar capturas.
 El repositorio es local, sin remoto. `git log` tiene el detalle de cada
 cambio y qué se verificó en cada uno. Para volver al sitio tal como estaba
 publicado el 29/09/2026: `git checkout a8713d6`.
+
+## Tipografía
+
+`SpaceGrotesk-Variable.woff2` (49 KB). El original era TTF de 137 KB; se
+convirtió con fontTools sin pérdida: los 1.001 glifos y el eje variable
+`wght 300..700` quedan intactos.
+
+No se conserva un TTF de respaldo a propósito: todo navegador que no soporta
+WOFF2 tampoco soporta fuentes variables, así que el respaldo no serviría. Si
+alguna vez hace falta, está en el commit `a8713d6`.
+
+Para regenerarlo desde un TTF:
+
+```python
+from fontTools.ttLib import TTFont
+f = TTFont("SpaceGrotesk-Variable.ttf"); f.flavor = "woff2"
+f.save("SpaceGrotesk-Variable.woff2")   # requiere: pip install brotli
+```
