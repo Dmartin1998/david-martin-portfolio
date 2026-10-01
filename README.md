@@ -44,3 +44,48 @@ El movimiento incluye un flujo ilustrativo de la operación, transiciones al sel
 
 URL: https://david-martin-portfolio.vercel.app
 Proyecto Vercel: `david-martin-portfolio`, espacio personal de David.
+
+## Flujo de trabajo
+
+El fuente venía minificado en origen (una línea de 12.483 caracteres en
+`index.html`). Desde octubre de 2026 está formateado y versionado con Git.
+
+```text
+npm run dev            servidor local en http://127.0.0.1:4317
+npm run format         formatea public/index.html, design.css y revision.css
+npm run verify         format:check + check.mjs (lo que debe pasar antes de publicar)
+npm run snapshot <tag> captura la página completa a 1440, 390 y 320 px
+npm run build          copia public/ a dist/
+```
+
+### Antes de publicar un cambio
+
+1. `npm run snapshot antes` con el sitio sin tocar.
+2. Hacer el cambio.
+3. `npm run verify`.
+4. `npm run snapshot despues` y comparar los PNG de `qa/snapshots/`.
+   Si el cambio no debía alterar el render, los archivos tienen que ser
+   idénticos byte a byte. Así se demostró que des-minificar no cambió nada.
+5. `git commit` describiendo qué se verificó.
+
+`scripts/snapshot.cjs` desactiva animaciones y espera a las fuentes, de modo
+que dos corridas sobre el mismo HTML dan imágenes idénticas. Resuelve
+Playwright probando varias rutas y usa el Chromium que esté descargado.
+
+### Qué no formatear
+
+`app.js` y `revision.js` no se formatean: no estaban minificados, y `app.js`
+arma HTML con template literals donde los espacios en blanco sí son
+significativos. `scripts/format.mjs` sólo toca HTML y CSS.
+
+Al partir líneas de HTML hay que respetar la semántica del espacio en blanco:
+entre elementos en línea el espacio se pinta. El formateador sólo parte
+alrededor de elementos de bloque, salvo en los contenedores flex/grid
+listados en `CONTENEDORES_SIN_ESPACIO`. Antes de sumar una clase a esa lista,
+confirmar su `display` en el CSS y comparar capturas.
+
+## Historial
+
+El repositorio es local, sin remoto. `git log` tiene el detalle de cada
+cambio y qué se verificó en cada uno. Para volver al sitio tal como estaba
+publicado el 29/09/2026: `git checkout a8713d6`.
