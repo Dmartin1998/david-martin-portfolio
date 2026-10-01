@@ -1766,3 +1766,81 @@ html.motion-stopped {
     font-size:14px
   }
 }
+/* ---------------------------------------------------------------------------
+   Diagrama del hero: disposicion fluida por debajo de 1000px.
+
+   El diseno original coloca los cuatro nodos en posiciones absolutas fijas
+   (top/bottom/left/right en px) dentro de un tablero de alto fijo. Como los
+   nodos de abajo estan anclados por `bottom`, en cuanto su texto se parte en
+   una linea mas crecen hacia arriba e invaden el nucleo central.
+
+   Solapamiento medido sobre el sitio publicado, por ancho de viewport:
+     1440px  0px      1100px  0px      900px   9px      800px  0px
+      700px 16px       600px  0px      500px   0px      440px  0px
+      420px  1px       400px 10px      390px  14px      360px  3px
+      320px  6px
+
+   Con grid, el alto de cada fila lo define su contenido, de modo que el
+   solapamiento deja de ser posible a cualquier ancho en vez de solo en los
+   anchos que se probaron. Las lineas SVG se ocultan porque su trazado
+   describe la disposicion absoluta y no tendria sentido sobre la rejilla.
+   --------------------------------------------------------------------------- */
+
+@media (max-width:1000px) {
+  .process-board {
+    position:static;
+    height:auto;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    padding:14px
+  }
+  .process-wires {
+    display:none
+  }
+  .process-core {
+    position:static;
+    transform:none;
+    width:auto;
+    height:auto;
+    grid-column:1/-1;
+    flex-direction:row;
+    align-items:center;
+    justify-content:flex-start;
+    gap:12px;
+    padding:14px 16px
+  }
+  .core-ring {
+    display:none
+  }
+  .process-core strong {
+    font-size:20px;
+    margin-top:0
+  }
+  /* El original deja este texto en 6px, por debajo de lo legible. */
+  .process-core small {
+    font-size:10px;
+    margin-top:0;
+    margin-left:auto;
+    text-align:right
+  }
+  .process-node {
+    position:static;
+    inset:auto;
+    width:auto;
+    min-height:0
+  }
+  .process-node>strong {
+    font-size:13px
+  }
+  /* El original deja este texto en 7px, por debajo de lo legible. */
+  .process-node>small {
+    font-size:11px
+  }
+}
+
+@media (max-width:600px) {
+  .process-board {
+    grid-template-columns:minmax(0,1fr)
+  }
+}
