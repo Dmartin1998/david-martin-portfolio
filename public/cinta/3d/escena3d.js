@@ -210,7 +210,10 @@ async function crearEtiqueta() {
 
 /* ---------------------------------------------------------------- montar -- */
 
-export async function montar(lienzo, alTerminar) {
+export async function montar(lienzo, alTerminar, alPaso) {
+  // La escena avisa en que momento esta; quien la monta decide si eso
+  // suena, se registra o se ignora.
+  const paso = alPaso || function () {};
   const ancho = () => lienzo.clientWidth || 1;
   const alto = () => lienzo.clientHeight || 1;
 
@@ -486,15 +489,18 @@ export async function montar(lienzo, alTerminar) {
 
   async function secuencia() {
     // 1. primerisimo plano: el casete gira y la etiqueta pasa de canto
+    paso('girar');
     girar = 0.42;
     await esperar(2400);
 
     // 2. la camara se aleja y aparece la habitacion
+    paso('alejar');
     girar = 0.1;
     await mover(CAM.cerca, CAM.sala, CAM.miraCerca, CAM.miraSala, 2.5);
     girar = 0;
 
     // 3. el casete se endereza y se ubica frente a la ranura
+    paso('tomar');
     const p0 = casete.position.clone();
     const ry0 = casete.rotation.y;
     const rx0 = casete.rotation.x;
@@ -511,12 +517,14 @@ export async function montar(lienzo, alTerminar) {
     }
 
     // 4. baja y entra en la ranura
+    paso('bajar');
     for (let i = 0; i <= 46; i++) {
       const k = suave(i / 46);
       casete.position.y = mezcla(casRanura + 0.3, casRanura, k);
       casete.rotation.x = 0.28 * (1 - k);
       await esperar(16);
     }
+    paso('entrar');
     for (let i = 0; i <= 24; i++) {
       casete.position.z = mezcla(casZ, FONDO_VCR / 2 - 0.14, i / 24);
       await esperar(16);
@@ -524,6 +532,7 @@ export async function montar(lienzo, alTerminar) {
     casete.visible = false;
 
     // 5. clac, y la camara se pone de frente
+    paso('cargar');
     led.material.color.set(0xd8232a);
     haciaLluvia = true;
     brillo.intensity = 1.3;
@@ -531,18 +540,21 @@ export async function montar(lienzo, alTerminar) {
     await esperar(950);
 
     // 6. barras de color
+    paso('barras');
     haciaLluvia = false;
     pantalla.barras();
     brillo.intensity = 2.4;
     await esperar(620);
 
     // 7. la camara entra en el vidrio y la imagen se abomba
+    paso('vidrio');
     await mover(CAM.frente, CAM.dentro, CAM.miraFrente, CAM.miraDentro, 1.5, {
       duro: true,
       curva: [0.06, 0.42]
     });
     await esperar(260);
 
+    paso('fin');
     alTerminar();
     vivo = false;
     destino.dispose();

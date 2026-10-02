@@ -1,7 +1,9 @@
-// La cinta — apertura, estaciones y radio sintetizada.
-// Sin dependencias y sin archivos de audio: las cuatro emisoras se generan
-// con osciladores de la Web Audio API. Un MP3 de un tema de los 90 tendria
-// derechos de autor; ademas, la web de esa epoca sonaba a MIDI, no a MP3.
+// La cinta — apertura, estaciones, efectos y radio sintetizada.
+// Sin dependencias y sin archivos de audio: las cuatro emisoras y los golpes
+// del mecanismo se generan con osciladores de la Web Audio API. Un MP3 de un
+// tema de los 90 tendria derechos de autor; ademas, la web de esa epoca sonaba
+// a MIDI, no a MP3. Los efectos de la apertura viven en /cinta/sonido.js y se
+// bajan solo si alguien enciende el sonido.
 
 (function () {
   'use strict';
@@ -10,6 +12,90 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var stage = $('stage'), bar = $('bar'), radio = $('radio'), skip = $('skip');
+  // tick() se declara mas abajo pero reveal() la llama, y reveal() puede
+  // correr en la primera linea del archivo si la apertura ya se vio en esta
+  // sesion. Las variables que usa tienen que estar asignadas antes.
+  var tc = $('tc'), root = document.documentElement;
+
+  /* -------------------------------------------------------------- sonido */
+  // Un solo AudioContext para todo, con un bus de salida que hace de volumen
+  // maestro. Ningun navegador deja que una pagina suene antes de que la
+  // toquen, asi que el boton no es un adorno: es la unica forma de que la
+  // apertura tenga audio. Quien no lo toca ve exactamente lo de siempre.
+
+  var ac = null, bus = null, son = null, cargando = false;
+  var radioLista = false;
+  var sonando_fx = false, ultimoPaso = null;
+  var snd = $('snd');
+
+  function arrancar() {
+    if (ac) return true;
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return false;
+    try { ac = new Ctx(); } catch (e) { ac = null; return false; }
+    bus = ac.createGain();
+    bus.gain.value = 1;
+    bus.connect(ac.destination);
+    return true;
+  }
+
+  function pintar() {
+    snd.textContent = sonando_fx ? '\u25C9 SONIDO' : '\u25CE SONIDO';
+    snd.setAttribute('aria-pressed', String(sonando_fx));
+    snd.classList.toggle('mudo', !sonando_fx);
+  }
+
+  function cargarFx() {
+    if (son || cargando) return;
+    cargando = true;
+    import('/cinta/sonido.js')
+      .then(function (m) {
+        son = m.crear(ac, bus);
+        if (ultimoPaso) son.desde(ultimoPaso);
+        else if (revealed) son.ambiente('reposo', 1.6);
+      })
+      .catch(function () { cargando = false; });
+  }
+
+  function sonidoOn() {
+    if (!arrancar()) { snd.hidden = true; return false; }
+    if (ac.state === 'suspended') { try { ac.resume(); } catch (e) {} }
+    sonando_fx = true;
+    bus.gain.cancelScheduledValues(ac.currentTime);
+    bus.gain.setTargetAtTime(1, ac.currentTime, 0.08);
+    cargarFx();
+    try { localStorage.setItem('cinta-sonido', '1'); } catch (e) {}
+    pintar();
+    return true;
+  }
+
+  function sonidoOff() {
+    sonando_fx = false;
+    if (bus) {
+      bus.gain.cancelScheduledValues(ac.currentTime);
+      bus.gain.setTargetAtTime(0, ac.currentTime, 0.06);
+    }
+    try { localStorage.setItem('cinta-sonido', '0'); } catch (e) {}
+    pintar();
+  }
+
+  snd.addEventListener('click', function () {
+    if (sonando_fx) sonidoOff(); else sonidoOn();
+  });
+
+  // Si ya lo encendio otra vez, se intenta solo. Puede quedar en suspenso
+  // hasta el primer gesto: el navegador manda, y no hay forma de evitarlo.
+  var queria = false;
+  try { queria = localStorage.getItem('cinta-sonido') === '1'; } catch (e) {}
+  if (queria) sonidoOn(); else pintar();
+
+  function despertar() {
+    if (ac && sonando_fx && ac.state === 'suspended') {
+      try { ac.resume(); } catch (e) {}
+    }
+  }
+  addEventListener('pointerdown', despertar, { passive: true });
+  addEventListener('keydown', despertar);
 
   /* ------------------------------------------------------------ apertura */
   // Secuencia: la firma se escribe, se vuelve etiqueta del casete, la camara
@@ -27,10 +113,15 @@
     revealed = true;
     relojes.forEach(clearTimeout);
     stage.classList.add('gone');
+    // Desde aca el tubo manda: las capas que solo tienen sentido sobre el
+    // contenido se encienden con esta clase y no antes, para no ensuciar
+    // la apertura, que ya trae su propio filtro en el shader.
+    document.body.classList.add('dentro');
     $('crt').classList.add('on');
     bar.classList.add('on');
     radio.classList.add('on');
     skip.hidden = true;
+    if (son) son.ambiente('reposo', 1.6);
     try { sessionStorage.setItem('cinta-vista', '1'); } catch (e) {}
     luego(700, function () { stage.hidden = true; });
     tick();
@@ -74,7 +165,12 @@
       if (!hayGL) { reveal(); return; }
 
       import('/cinta/3d/escena3d.js')
-        .then(function (mod) { return mod.montar(lienzo, reveal); })
+        .then(function (mod) {
+          return mod.montar(lienzo, reveal, function (n) {
+            ultimoPaso = n;
+            if (son) son.paso(n);
+          });
+        })
         .then(function (escena) {
           if (revealed) { escena.detener(); return; }
           sigbox.classList.add('gone');
@@ -93,8 +189,6 @@
   }, { passive: true });
 
   /* -------------------------------- timecode y limpieza progresiva de ruido */
-
-  var tc = $('tc'), root = document.documentElement;
 
   function tick() {
     var max = root.scrollHeight - root.clientHeight;
@@ -242,7 +336,7 @@
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(vol, t + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
-    o.connect(f); f.connect(g); g.connect(ac.destination);
+    o.connect(f); f.connect(g); g.connect(bus);
     o.start(t);
     o.stop(t + dur + 0.02);
   }
@@ -255,7 +349,7 @@
     f.type = 'highpass';
     f.frequency.value = 7200;
     g.gain.value = 0.045;
-    s.connect(f); f.connect(g); g.connect(ac.destination);
+    s.connect(f); f.connect(g); g.connect(bus);
     s.start(t);
   }
 
@@ -287,11 +381,18 @@
   }
 
   function encender() {
-    if (ac) return true;
-    var Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) { dial.textContent = 'SIN AUDIO'; return false; }
-    try { ac = new Ctx(); } catch (e) { dial.textContent = 'SIN AUDIO'; return false; }
-    sintonizar(0);
+    // Tocar la radio enciende el sonido: seria absurdo apretar PLAY y que no
+    // suene porque el interruptor maestro esta en cero.
+    if (!sonando_fx) {
+      if (!sonidoOn()) { dial.textContent = 'SIN AUDIO'; return false; }
+    } else if (!arrancar()) {
+      dial.textContent = 'SIN AUDIO';
+      return false;
+    }
+    // El dial se rotula la primera vez que alguien usa la radio, no la primera
+    // vez que se crea el contexto: el interruptor maestro ya puede haberlo
+    // creado sin que la radio se haya tocado nunca.
+    if (!radioLista) { radioLista = true; sintonizar(0); }
     return true;
   }
 

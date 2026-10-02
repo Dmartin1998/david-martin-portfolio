@@ -21,8 +21,10 @@
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <div class="scan" aria-hidden="true"></div>
+    <div class="grid" aria-hidden="true"></div>
     <div class="vig" aria-hidden="true"></div>
-    <div class="crt" id="crt" aria-hidden="true"></div>
+    <div class="flick" aria-hidden="true"><span class="track"></span></div>
+    <div class="crt" id="crt" aria-hidden="true"><svg class="tube" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false"><defs><clipPath id="vidrio"><path d="M7.6,3 Q50,-1 92.4,3 Q97,3 97,7.6 Q101,50 97,92.4 Q97,97 92.4,97 Q50,101 7.6,97 Q3,97 3,92.4 Q-1,50 3,7.6 Q3,3 7.6,3 Z"></path></clipPath></defs><path class="tube-out" fill-rule="evenodd" d="M0,0 H100 V100 H0 Z M7.6,3 Q50,-1 92.4,3 Q97,3 97,7.6 Q101,50 97,92.4 Q97,97 92.4,97 Q50,101 7.6,97 Q3,97 3,92.4 Q-1,50 3,7.6 Q3,3 7.6,3 Z"></path><g clip-path="url(#vidrio)"><path class="tube-s3" d="M7.6,3 Q50,-1 92.4,3 Q97,3 97,7.6 Q101,50 97,92.4 Q97,97 92.4,97 Q50,101 7.6,97 Q3,97 3,92.4 Q-1,50 3,7.6 Q3,3 7.6,3 Z"></path><path class="tube-s2" d="M7.6,3 Q50,-1 92.4,3 Q97,3 97,7.6 Q101,50 97,92.4 Q97,97 92.4,97 Q50,101 7.6,97 Q3,97 3,92.4 Q-1,50 3,7.6 Q3,3 7.6,3 Z"></path><path class="tube-s1" d="M7.6,3 Q50,-1 92.4,3 Q97,3 97,7.6 Q101,50 97,92.4 Q97,97 92.4,97 Q50,101 7.6,97 Q3,97 3,92.4 Q-1,50 3,7.6 Q3,3 7.6,3 Z"></path></g><path class="tube-rim" d="M7.6,3 Q50,-1 92.4,3 Q97,3 97,7.6 Q101,50 97,92.4 Q97,97 92.4,97 Q50,101 7.6,97 Q3,97 3,92.4 Q-1,50 3,7.6 Q3,3 7.6,3 Z"></path></svg></div>
     <header class="bar" id="bar"><a class="bar-sig" href="/cinta" aria-label="David Martín, inicio">David Martín</a>
       <span class="tc" id="tc" aria-label="Año en curso">00:20:00</span></header>
     <div class="stage" id="stage" aria-hidden="true">
@@ -31,6 +33,7 @@
         <div class="sigbox" id="sigbox"><svg class="sigsvg" viewBox="0 0 800 190" role="img" aria-label="Firma de David Martín"><defs><clipPath id="wipe"><rect id="wiperect" x="0" y="0" width="0" height="190"></rect></clipPath></defs><text class="sigtext" x="400" y="118" text-anchor="middle" clip-path="url(#wipe)">David Martín</text><rect class="sigline" id="sigline" x="400" y="146" width="0" height="2"></rect></svg></div>
       </div>
     </div>
+    <button class="snd" id="snd" type="button" aria-pressed="false">◎ SONIDO</button>
     <button class="skip" id="skip" type="button">SALTEAR ▸▸</button>
     <div class="radio" id="radio" role="group" aria-label="Radio"><span class="dial" id="dial">—— FM</span>
       <button id="play" type="button" aria-pressed="false">▶ PLAY</button>

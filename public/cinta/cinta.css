@@ -48,6 +48,12 @@
   --line: #3a3832;
   --panel: #15140f;
   --noise: 1;
+  /* Lo que hay que entrar para no quedar tapado por el marco del tubo: mas en
+     los bordes de arriba y abajo, donde la esquina muerde el ancho entero. */
+  --borde: max(22px, 7vw);
+  --costado: max(18px, 4.4vw);
+  /* Lo que ocupa la barra ya corrida hacia adentro del vidrio. */
+  --bajobarra: calc(86px + 1.8vh + env(safe-area-inset-top, 0px));
   --sans: Instrument Sans, system-ui, -apple-system, Segoe UI, sans-serif;
   --mono: Plex Mono, ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -118,16 +124,37 @@ a {
   padding: 10px 14px;
 }
 /* ---------------------------------------------------------------- barrido */
+/* Cinco capas fijas y ninguna con filtro: todas son gradientes o una opacidad,
+   asi que el compositor las deja quietas y el scroll no repinta nada.
+   El grano se limpia con el relato (--noise va de 1 a 0 de 2020 a 2026), pero
+   el barrido y la vineta conservan un piso: el tubo no desaparece nunca. */
 
 .scan {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 60;
-  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.24) 0 1px, transparent 1px 3px);
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.26) 0 1px, transparent 1px 3px);
   mix-blend-mode: multiply;
-  opacity: calc(0.6 * var(--noise));
+  opacity: calc(0.3 + 0.38 * var(--noise));
   transition: opacity 0.3s linear;
+}
+/* La mascara de ranuras: las tres franjas de fosforo verticales. Sumadas al
+   barrido horizontal dan la trama cruzada que tiene un tubo de verdad. */
+
+.grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 57;
+  opacity: 0;
+  background: repeating-linear-gradient(to right, rgba(255, 46, 46, 0.055) 0 1px, rgba(46, 255, 78, 0.055) 1px 2px, rgba(54, 96, 255, 0.055) 2px 3px);
+  mix-blend-mode: screen;
+  transition: opacity 0.9s ease;
+}
+
+body.dentro .grid {
+  opacity: 1;
 }
 
 .vig {
@@ -135,28 +162,163 @@ a {
   inset: 0;
   pointer-events: none;
   z-index: 59;
-  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.8) 100%);
-  opacity: calc(0.22 + 0.58 * var(--noise));
+  background: radial-gradient(ellipse at center, transparent 44%, rgba(0, 0, 0, 0.82) 100%);
+  opacity: calc(0.36 + 0.44 * var(--noise));
   transition: opacity 0.3s linear;
 }
+/* El latido del haz. Un tubo no entrega un brillo constante: la fuente se
+   carga y se descarga, y la imagen respira. Seis segundos y medio y un maximo
+   del 6 % de oscurecido, lo justo para notarlo sin marear. */
+
+.flick {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 58;
+  background: #000;
+  mix-blend-mode: multiply;
+  opacity: 0.014;
+}
+
+body.dentro .flick {
+  animation: latir 6.4s ease-in-out infinite;
+}
+
+@keyframes latir {
+  0%,
+  100% {
+    opacity: 0.012;
+  }
+  37% {
+    opacity: 0.058;
+  }
+  63% {
+    opacity: 0.026;
+  }
+}
+/* Cada tanto el seguimiento se va y sube una banda. Es lo que uno recuerda de
+   una cinta vista cien veces, y cuesta un transform en una capa propia. */
+
+.track {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 15vh;
+  pointer-events: none;
+  z-index: 59;
+  opacity: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.012) 36%, rgba(214, 226, 240, 0.06) 47%, rgba(255, 255, 255, 0.014) 58%, rgba(255, 255, 255, 0) 100%);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+body.dentro .track {
+  animation: rodar 19s linear infinite;
+}
+
+@keyframes rodar {
+  0%,
+  81% {
+    opacity: 0;
+    transform: translateY(-18vh);
+  }
+  83% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(118vh);
+  }
+}
+/* ------------------------------------------------------------ fosforo */
+/* El texto de un tubo no tiene borde limpio: el haz excita el fosforo de al
+   lado. Un halo del 20 % alcanza y no toca la legibilidad. */
+body.dentro h1,
+
+body.dentro h2 {
+  text-shadow: 0 0 24px rgba(232, 230, 223, 0.2);
+}
+body.dentro .bar-sig,
+body.dentro .tc,
+
+body.dentro .dial {
+  text-shadow: 0 0 13px currentcolor;
+}
+/* Una superficie clara en un tubo no termina en un filo: el haz se pasa de
+   rosca y el brillo se derrama sobre el fosforo de al lado. */
+body.dentro .final,
+
+body.dentro .clap-top {
+  box-shadow: 0 0 56px 8px rgba(242, 239, 230, 0.08);
+}
 /* ------------------------------------------------------------- barra fija */
-/* El tubo no desaparece al pasar a la navegacion: seguis adentro de la tele.
-   La sombra exterior gigante pinta de negro todo lo que queda fuera del radio,
-   asi las esquinas curvas del vidrio son reales y no un dibujo encima. */
+/* El tubo no desaparece al pasar a la navegacion: seguis adentro de la tele,
+   asi que la barra y la radio entran lo que haga falta para no quedar debajo
+   del marco, que en las esquinas se come el 7 % del ancho. */
+/* El contorno es un rectangulo con los cuatro lados abombados, que es la
+   forma real del vidrio de un tubo; un border-radius da una esquina redonda
+   pero los lados rectos, y es justo el detalle que delata el truco.
+   Al dibujarlo como un path, el negro de alrededor, el oscurecido del borde y
+   el filo del vidrio caen los tres sobre la misma curva. El brillo del vidrio
+   va aparte, en CSS, porque un gradiente suave no necesita seguir ninguna
+   curva y en SVG costaria un filtro de desenfoque. */
 
 .crt {
   position: fixed;
-  inset: 10px;
-  z-index: 58;
+  inset: 0;
+  z-index: 61;
   pointer-events: none;
-  border-radius: 30px / 24px;
   opacity: 0;
   transition: opacity 0.5s ease;
-  box-shadow: 0 0 0 100vmax #000, inset 0 0 0 1px rgba(214, 226, 240, 0.16), inset 0 0 0 4px rgba(0, 0, 0, 0.95), inset 0 0 40px 14px rgba(0, 0, 0, 0.85), inset 0 0 150px 34px rgba(0, 0, 0, 0.55), inset 0 3px 2px rgba(255, 255, 255, 0.06);
+  background: radial-gradient(118% 60% at 26% -14%, rgba(226, 236, 250, 0.075), rgba(226, 236, 250, 0) 62%), radial-gradient(86% 66% at 84% 112%, rgba(126, 156, 196, 0.05), rgba(126, 156, 196, 0) 58%);
 }
 
 .crt.on {
   opacity: 1;
+}
+
+.tube {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tube-out {
+  fill: #000;
+}
+.tube-s3,
+.tube-s2,
+.tube-s1,
+
+.tube-rim {
+  fill: none;
+  /* El trazo se mide en pixeles de pantalla: el viewBox se estira al viewport
+     y sin esto el borde saldria mas gordo de un lado que del otro. */
+  vector-effect: non-scaling-stroke;
+}
+
+.tube-s3 {
+  stroke: rgba(0, 0, 0, 0.4);
+  stroke-width: 30;
+}
+
+.tube-s2 {
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-width: 13;
+}
+
+.tube-s1 {
+  stroke: rgba(0, 0, 0, 0.72);
+  stroke-width: 5;
+}
+
+.tube-rim {
+  stroke: rgba(214, 226, 240, 0.18);
+  stroke-width: 1;
 }
 
 .bar {
@@ -169,8 +331,10 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px;
-  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  /* La esquina del tubo se come el 2,8 % del ancho: la barra arranca despues,
+     si no el nombre queda cortado por el vidrio. */
+  padding: 11px var(--borde);
+  padding-top: calc(22px + 1.8vh + env(safe-area-inset-top, 0px));
   background: linear-gradient(to bottom, rgba(11, 11, 13, 0.96), rgba(11, 11, 13, 0));
   opacity: 0;
   transition: opacity 0.6s ease;
@@ -286,8 +450,8 @@ a {
 
 .skip {
   position: fixed;
-  right: 16px;
-  top: calc(56px + env(safe-area-inset-top, 0px));
+  right: var(--costado);
+  top: calc(var(--bajobarra) + 44px);
   z-index: 55;
   font-family: var(--mono);
   font-size: 11px;
@@ -296,6 +460,51 @@ a {
   background: rgba(11, 11, 13, 0.8);
   border: 1px solid var(--line);
   padding: 9px 13px;
+}
+/* ------------------------------------------------------ interruptor de sonido */
+/* No es un adorno: ningun navegador deja que una pagina suene antes de que la
+   toquen, asi que este boton es la unica forma de que la apertura tenga audio.
+   Aparece junto con la firma, que son dos segundos en los que no pasa nada
+   mas, y despues se queda como silencio general de la radio y del ambiente. */
+
+.snd {
+  position: fixed;
+  right: var(--costado);
+  top: var(--bajobarra);
+  z-index: 55;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--phos);
+  background: rgba(11, 11, 13, 0.82);
+  border: 1px solid var(--dim);
+  padding: 9px 13px;
+}
+
+.snd.mudo {
+  color: var(--dim);
+  border-color: var(--line);
+}
+
+.snd:hover {
+  border-color: var(--phos);
+  color: var(--phos);
+}
+/* Mientras la apertura corre y sigue en silencio, late para que se vea. */
+
+body:not(.dentro) .snd.mudo {
+  animation: pulso 2.6s ease-in-out infinite;
+}
+
+@keyframes pulso {
+  0%,
+  100% {
+    border-color: var(--line);
+  }
+  50% {
+    border-color: var(--green);
+    color: var(--phos);
+  }
 }
 
 .skip:hover {
@@ -865,8 +1074,8 @@ a {
   z-index: 55;
   background: #15130f;
   border-top: 1px solid var(--line);
-  padding: 9px 14px;
-  padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+  padding: 9px var(--borde);
+  padding-bottom: calc(18px + 1.4vh + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
   gap: 9px;
@@ -913,7 +1122,6 @@ a {
 @media (max-width: 520px) {
   .radio {
     gap: 6px;
-    padding-inline: 12px;
   }
   .radio button {
     padding: 7px 9px;
@@ -953,5 +1161,12 @@ a {
   }
   .pgm.live .dot {
     animation: none;
+  }
+  body.dentro .flick,
+  body:not(.dentro) .snd.mudo {
+    animation: none;
+  }
+  .track {
+    display: none;
   }
 }
