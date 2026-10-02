@@ -620,6 +620,24 @@ body:not(.dentro) .snd.mudo {
   visibility: visible;
   transition: max-height 0.45s ease, margin 0.45s ease, visibility 0s;
 }
+/* Con la escena en 3D las habilidades se dibujan dentro de la pizarra. La
+   lista sigue aca, fuera de la vista pero entera, porque es la unica que un
+   lector de pantalla puede leer: lo que esta pintado en una textura de WebGL
+   no existe para nadie que no mire. Sin WebGL se muestra como siempre. */
+.clap.en3d ~ .skills,
+
+.station.on .clap.en3d ~ .skills {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  max-height: none;
+  visibility: visible;
+}
 
 .skills li {
   display: flex;
