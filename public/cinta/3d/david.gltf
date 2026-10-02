@@ -1,0 +1,156 @@
+{
+  "asset": {
+    "generator": "glTF-Transform v4.5.1",
+    "version": "2.0"
+  },
+  "accessors": [
+    {
+      "type": "SCALAR",
+      "componentType": 5125,
+      "count": 264243,
+      "bufferView": 0,
+      "byteOffset": 0
+    },
+    {
+      "type": "VEC3",
+      "componentType": 5122,
+      "count": 80837,
+      "max": [
+        13985,
+        32767,
+        7572
+      ],
+      "min": [
+        -13985,
+        -32767,
+        -7572
+      ],
+      "normalized": true,
+      "bufferView": 1,
+      "byteOffset": 0
+    },
+    {
+      "type": "VEC2",
+      "componentType": 5123,
+      "count": 80837,
+      "normalized": true,
+      "bufferView": 1,
+      "byteOffset": 8
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 1056972,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1056972,
+      "byteLength": 970044,
+      "byteStride": 12,
+      "target": 34962
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "extensions": {
+        "EXT_texture_webp": {
+          "source": 0
+        }
+      }
+    }
+  ],
+  "images": [
+    {
+      "name": "david_texture",
+      "mimeType": "image/webp",
+      "uri": "baseColor.webp"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "david.bin",
+      "byteLength": 2027016
+    }
+  ],
+  "materials": [
+    {
+      "name": "David | baked studio appearance",
+      "doubleSided": true,
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0,
+        "baseColorTexture": {
+          "index": 0
+        }
+      },
+      "extensions": {
+        "KHR_materials_unlit": {}
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "David | continuous 3D surface",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "TEXCOORD_0": 2
+          },
+          "mode": 4,
+          "material": 0,
+          "indices": 0
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "David | textured character",
+      "extras": {
+        "description": "Full-volume 3D reconstruction of the stylized David reference, no glasses. Static textured mesh.",
+        "source": "Original visual design based on the user-provided photographs."
+      },
+      "translation": [
+        0.00010357797145843506,
+        0.8999274373054504,
+        -0.0030170828104019165
+      ],
+      "scale": [
+        0.8999274373054504,
+        0.8999274373054504,
+        0.8999274373054504
+      ],
+      "mesh": 0
+    }
+  ],
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "scene": 0,
+  "extensionsUsed": [
+    "EXT_texture_webp",
+    "KHR_materials_unlit",
+    "KHR_mesh_quantization"
+  ],
+  "extensionsRequired": [
+    "EXT_texture_webp",
+    "KHR_mesh_quantization"
+  ]
+}

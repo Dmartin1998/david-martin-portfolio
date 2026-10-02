@@ -9,9 +9,12 @@
 // de modo que la pose es la que es: la claqueta no se sostiene, se posa al
 // lado y flota. Las luces que hay son para la claqueta, que si las usa.
 //
-// El modelo original pesaba 13 MB. Quedo en 1,1: la textura paso a WebP de
-// 1280, la malla se simplifico al 45 % con los bordes bloqueados y todo va
-// comprimido con meshopt. Se carga en diferido, recien cuando la ficha
+// El modelo original pesaba 13,5 MB y se transfiere en 1,34: la textura paso a
+// WebP de 1280, la malla se simplifico al 45 % con los bordes bloqueados y los
+// atributos van cuantizados a enteros. Se descarto meshopt, que lo dejaba en
+// 1,11, porque su decodificador compila WebAssembly y eso exige abrir la CSP
+// con wasm-unsafe-eval: doscientos y pico de kilobytes no valen aflojar la
+// politica de todo el sitio. Se carga en diferido, recien cuando la ficha
 // aparece en pantalla.
 //
 // Las habilidades van dibujadas DENTRO de la pizarra, no debajo. Se dibujan en
@@ -25,9 +28,12 @@
 
 import * as THREE from './three.module.min.js';
 import { GLTFLoader } from './GLTFLoader.js';
-import { MeshoptDecoder } from './meshopt_decoder.module.js';
 
-const RUTA = '/cinta/3d/david.glb';
+// En .gltf con el .bin y la textura afuera, no en un .glb: con todo embebido,
+// GLTFLoader saca la imagen por una URL blob: y la CSP del sitio
+// (connect-src 'self') la bloquea. Asi son tres pedidos del propio origen, se
+// cachean por separado y la CSP se queda como esta.
+const RUTA = '/cinta/3d/david.gltf';
 
 const suave = (t) => t * t * (3 - 2 * t);
 const mezcla = (a, b, t) => a + (b - a) * t;
@@ -457,7 +463,6 @@ export function montar(lienzoGL, opciones) {
   persona.rotation.y = -0.2;
 
   const cargador = new GLTFLoader();
-  cargador.setMeshoptDecoder(MeshoptDecoder);
   let llegada = 0;
   cargador.load(RUTA, function (g) {
     persona.add(g.scene);
