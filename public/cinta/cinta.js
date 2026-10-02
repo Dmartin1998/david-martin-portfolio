@@ -19,14 +19,18 @@
 
   /* -------------------------------------------------------------- sonido */
   // Un solo AudioContext para todo, con un bus de salida que hace de volumen
-  // maestro. Ningun navegador deja que una pagina suene antes de que la
-  // toquen, asi que el boton no es un adorno: es la unica forma de que la
-  // apertura tenga audio. Quien no lo toca ve exactamente lo de siempre.
+  // maestro. Viene encendido: no hay interruptor.
+  //
+  // Lo que ningun sitio puede saltearse es que el navegador no deja sonar nada
+  // hasta que alguien toca la pagina. No es una decision nuestra ni se arregla
+  // con configuracion. Asi que el contexto se crea y se intenta despertar de
+  // entrada, y ademas queda a la espera del primer gesto —un toque, una tecla,
+  // una rueda de scroll— para despertarlo ahi. En la practica: si llegas y te
+  // quedas quieto, la apertura es muda; apenas movete algo, suena.
 
   var ac = null, bus = null, son = null, cargando = false;
   var radioLista = false;
-  var sonando_fx = false, ultimoPaso = null;
-  var snd = $('snd');
+  var ultimoPaso = null;
 
   function arrancar() {
     if (ac) return true;
@@ -34,19 +38,14 @@
     if (!Ctx) return false;
     try { ac = new Ctx(); } catch (e) { ac = null; return false; }
     bus = ac.createGain();
-    bus.gain.value = 1;
+    // Estaba demasiado fuerte. El bus baja todo, efectos y radio.
+    bus.gain.value = 0.8;
     bus.connect(ac.destination);
     return true;
   }
 
-  function pintar() {
-    snd.textContent = sonando_fx ? '\u25C9 SONIDO' : '\u25CE SONIDO';
-    snd.setAttribute('aria-pressed', String(sonando_fx));
-    snd.classList.toggle('mudo', !sonando_fx);
-  }
-
   function cargarFx() {
-    if (son || cargando) return;
+    if (son || cargando || !ac) return;
     cargando = true;
     import('/cinta/sonido.js')
       .then(function (m) {
@@ -57,45 +56,24 @@
       .catch(function () { cargando = false; });
   }
 
-  function sonidoOn() {
-    if (!arrancar()) { snd.hidden = true; return false; }
-    if (ac.state === 'suspended') { try { ac.resume(); } catch (e) {} }
-    sonando_fx = true;
-    bus.gain.cancelScheduledValues(ac.currentTime);
-    bus.gain.setTargetAtTime(1, ac.currentTime, 0.08);
-    cargarFx();
-    try { localStorage.setItem('cinta-sonido', '1'); } catch (e) {}
-    pintar();
-    return true;
-  }
-
-  function sonidoOff() {
-    sonando_fx = false;
-    if (bus) {
-      bus.gain.cancelScheduledValues(ac.currentTime);
-      bus.gain.setTargetAtTime(0, ac.currentTime, 0.06);
-    }
-    try { localStorage.setItem('cinta-sonido', '0'); } catch (e) {}
-    pintar();
-  }
-
-  snd.addEventListener('click', function () {
-    if (sonando_fx) sonidoOff(); else sonidoOn();
-  });
-
-  // Si ya lo encendio otra vez, se intenta solo. Puede quedar en suspenso
-  // hasta el primer gesto: el navegador manda, y no hay forma de evitarlo.
-  var queria = false;
-  try { queria = localStorage.getItem('cinta-sonido') === '1'; } catch (e) {}
-  if (queria) sonidoOn(); else pintar();
-
   function despertar() {
-    if (ac && sonando_fx && ac.state === 'suspended') {
-      try { ac.resume(); } catch (e) {}
-    }
+    if (!ac) return;
+    if (ac.state === 'suspended') { try { ac.resume(); } catch (e) {} }
   }
-  addEventListener('pointerdown', despertar, { passive: true });
-  addEventListener('keydown', despertar);
+
+  if (arrancar()) {
+    // Pedir resume() ANTES de que el navegador registre un gesto deja el
+    // contexto trabado: los resume() que vienen despues ya no hacen nada y el
+    // sitio se queda mudo para siempre. Solo se intenta de entrada si la
+    // pagina ya viene activada (una recarga, una vuelta atras); si no, se
+    // espera al primer gesto.
+    if (!navigator.userActivation || navigator.userActivation.hasBeenActive) despertar();
+    cargarFx();
+    addEventListener('pointerdown', despertar, { passive: true });
+    addEventListener('keydown', despertar);
+    addEventListener('touchstart', despertar, { passive: true });
+    addEventListener('wheel', despertar, { passive: true });
+  }
 
   /* ------------------------------------------------------------ apertura */
   // Secuencia: la firma se escribe, se vuelve etiqueta del casete, la camara
@@ -218,7 +196,23 @@
     tc.textContent = '00:' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     // El grano arranca al maximo en 2020 y llega a cero antes del final.
     root.style.setProperty('--noise', String(Math.max(0, 1 - p * 1.25)));
+    // Lo que mueve a la linea de tiempo. Es una variable, no un estilo suelto:
+    // la CSP del sitio prohibe el atributo style, pero deja escribir en el
+    // objeto de estilo desde JS, que es lo que hace setProperty.
+    root.style.setProperty('--avance', p.toFixed(4));
   }
+
+  // El corredor solo trota mientras la pagina se mueve. Ojo con el nombre: mas
+  // abajo hay un correr() que es el secuenciador de la radio, y como las
+  // declaraciones de funcion se izan, llamar al de aca disparaba notas con
+  // cada rueda de scroll.
+  var linea = $('linea'), quietoEn = null;
+  function trotar() {
+    linea.classList.add('corriendo');
+    clearTimeout(quietoEn);
+    quietoEn = setTimeout(function () { linea.classList.remove('corriendo'); }, 170);
+  }
+  window.addEventListener('scroll', trotar, { passive: true });
 
   window.addEventListener('scroll', tick, { passive: true });
   window.addEventListener('resize', tick);
@@ -226,14 +220,13 @@
 
   /* ---------------------------------------------------------- 01 claqueta */
 
-  var clap = $('clap'), s1 = $('s1'), h1 = $('h1'), clapgl = $('clapgl');
+  var clap = $('clap'), s1 = $('s1'), clapgl = $('clapgl');
   var ficha = null, montando = false;
 
   clap.addEventListener('click', function () {
     var on = clap.classList.toggle('on');
     s1.classList.toggle('on', on);
     clap.setAttribute('aria-expanded', String(on));
-    h1.textContent = on ? 'ESCENA 01 — HABILIDADES' : 'TOCÁ LA CLAQUETA';
     if (ficha) { if (on) ficha.abrir(); else ficha.cerrar(); }
     if (on) {
       blip(880);
@@ -356,7 +349,12 @@
 
   /* -------------------------------------------------------------- radio */
 
-  var ac = null, timer = null, step = 0, emisora = 0, sonando = false;
+  // Ojo: aca habia un `var ac = null` heredado de cuando el audio nacia con la
+  // radio. var no abre ambito, asi que esa asignacion corria DESPUES de crear
+  // el contexto arriba y lo dejaba en null. No se notaba mientras el contexto
+  // se creaba al apretar un boton, o sea despues de que el archivo terminara
+  // de ejecutarse; al pasar el encendido al arranque, dejo todo mudo.
+  var timer = null, step = 0, emisora = 0, sonando = false;
 
   var EMISORAS = [
     {
@@ -433,17 +431,10 @@
   }
 
   function encender() {
-    // Tocar la radio enciende el sonido: seria absurdo apretar PLAY y que no
-    // suene porque el interruptor maestro esta en cero.
-    if (!sonando_fx) {
-      if (!sonidoOn()) { dial.textContent = 'SIN AUDIO'; return false; }
-    } else if (!arrancar()) {
-      dial.textContent = 'SIN AUDIO';
-      return false;
-    }
-    // El dial se rotula la primera vez que alguien usa la radio, no la primera
-    // vez que se crea el contexto: el interruptor maestro ya puede haberlo
-    // creado sin que la radio se haya tocado nunca.
+    if (!arrancar()) { dial.textContent = 'SIN AUDIO'; return false; }
+    despertar();
+    // El dial se rotula la primera vez que alguien usa la radio, no cuando se
+    // crea el contexto: eso ya pasa al cargar la pagina.
     if (!radioLista) { radioLista = true; sintonizar(0); }
     return true;
   }

@@ -54,6 +54,8 @@
   --costado: max(18px, 4.4vw);
   /* Lo que ocupa la barra ya corrida hacia adentro del vidrio. */
   --bajobarra: calc(86px + 1.8vh + env(safe-area-inset-top, 0px));
+  /* Cuanto avanzo el relato, de 0 a 1. Lo escribe el scroll. */
+  --avance: 0;
   --sans: Instrument Sans, system-ui, -apple-system, Segoe UI, sans-serif;
   --mono: Plex Mono, ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -346,8 +348,12 @@ body.dentro .clap-top {
 
 .bar-sig {
   font-family: Firma, cursive;
-  font-size: clamp(24px, 6vw, 32px);
-  line-height: 0.8;
+  /* La curva de la esquina del tubo mordia la firma por arriba y por la
+     izquierda. Entra un poco mas y se le deja aire alrededor. */
+  font-size: clamp(21px, 5vw, 27px);
+  line-height: 1;
+  padding: 2px 6px 4px;
+  margin-left: 2px;
   text-decoration: none;
 }
 
@@ -451,7 +457,7 @@ body.dentro .clap-top {
 .skip {
   position: fixed;
   right: var(--costado);
-  top: calc(var(--bajobarra) + 44px);
+  top: var(--bajobarra);
   z-index: 55;
   font-family: var(--mono);
   font-size: 11px;
@@ -460,51 +466,6 @@ body.dentro .clap-top {
   background: rgba(11, 11, 13, 0.8);
   border: 1px solid var(--line);
   padding: 9px 13px;
-}
-/* ------------------------------------------------------ interruptor de sonido */
-/* No es un adorno: ningun navegador deja que una pagina suene antes de que la
-   toquen, asi que este boton es la unica forma de que la apertura tenga audio.
-   Aparece junto con la firma, que son dos segundos en los que no pasa nada
-   mas, y despues se queda como silencio general de la radio y del ambiente. */
-
-.snd {
-  position: fixed;
-  right: var(--costado);
-  top: var(--bajobarra);
-  z-index: 55;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--phos);
-  background: rgba(11, 11, 13, 0.82);
-  border: 1px solid var(--dim);
-  padding: 9px 13px;
-}
-
-.snd.mudo {
-  color: var(--dim);
-  border-color: var(--line);
-}
-
-.snd:hover {
-  border-color: var(--phos);
-  color: var(--phos);
-}
-/* Mientras la apertura corre y sigue en silencio, late para que se vea. */
-
-body:not(.dentro) .snd.mudo {
-  animation: pulso 2.6s ease-in-out infinite;
-}
-
-@keyframes pulso {
-  0%,
-  100% {
-    border-color: var(--line);
-  }
-  50% {
-    border-color: var(--green);
-    color: var(--phos);
-  }
 }
 
 .skip:hover {
@@ -550,6 +511,43 @@ body:not(.dentro) .snd.mudo {
 /* El indicador de "tocame". En la ficha 01 lo acompana un anillo que late
    alrededor de la claqueta dentro del lienzo; aca afuera el punto verde dice
    lo mismo para quien no tiene WebGL, y se apaga cuando ya la tocaron. */
+/* El ano y la escuela, al frente del bloque: es el dato que ordena la ficha,
+   y antes iba escondido en la linea chica de arriba. */
+
+.sello {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 2px 0 10px;
+  max-width: none;
+}
+
+.sello b {
+  font-family: Tubo, var(--mono);
+  font-size: clamp(42px, 9vw, 64px);
+  line-height: 0.85;
+  font-weight: 400;
+  color: var(--phos);
+  letter-spacing: 0.01em;
+}
+
+.sello span {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+  text-transform: uppercase;
+}
+
+.bajada {
+  color: var(--phos);
+  font-size: clamp(17px, 2.6vw, 21px);
+  line-height: 1.38;
+  letter-spacing: -0.01em;
+  max-width: 34ch;
+  margin-bottom: 10px;
+}
 
 .hint {
   display: inline-flex;
@@ -667,16 +665,16 @@ body:not(.dentro) .snd.mudo {
   flex: 1 1 auto;
   max-width: 158px;
   height: 12px;
-  background-image: linear-gradient(to right, var(--line) 0 72%, transparent 72%);
-  background-size: 10% 100%;
+  background-image: linear-gradient(to right, var(--line) 0 68%, transparent 68%);
+  background-size: 5% 100%;
 }
 
 .nivel::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(to right, var(--c) 0 72%, transparent 72%);
-  background-size: 10% 100%;
+  background-image: linear-gradient(to right, var(--c) 0 68%, transparent 68%);
+  background-size: 5% 100%;
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) 0.15s;
 }
@@ -693,22 +691,22 @@ body:not(.dentro) .snd.mudo {
   color: var(--c);
 }
 
-.n4 {
-  --n: 40%;
-  --c: #e0864e;
-}
-
-.n6 {
-  --n: 60%;
+.n55 {
+  --n: 55%;
   --c: #e8bd52;
 }
 
-.n8 {
+.n70 {
+  --n: 70%;
+  --c: #cdd45a;
+}
+
+.n80 {
   --n: 80%;
   --c: #b4dd5e;
 }
 
-.n9 {
+.n90 {
   --n: 90%;
   --c: #6ee07f;
 }
@@ -1266,6 +1264,118 @@ body:not(.dentro) .snd.mudo {
   color: var(--crt);
   border-color: var(--phos);
 }
+/* ---------------------------------------------------------- linea de tiempo */
+/* Va pegada al borde de arriba de la radio: asi aparece y desaparece con ella
+   y no hay que medir su alto desde JS. El corredor avanza con el scroll; lo
+   unico que escribe el JS es --avance, que es una variable, no un estilo
+   suelto: la CSP del sitio prohibe el atributo style. */
+
+.linea {
+  position: absolute;
+  left: var(--borde);
+  right: var(--borde);
+  top: -30px;
+  height: 26px;
+  pointer-events: none;
+}
+.riel,
+
+.avance {
+  position: absolute;
+  left: 0;
+  top: 19px;
+  height: 2px;
+}
+
+.riel {
+  right: 0;
+  background: var(--line);
+}
+
+.avance {
+  width: calc(var(--avance) * 100%);
+  background: linear-gradient(to right, rgba(127, 224, 127, 0.25), var(--green));
+}
+
+.hitos {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 19px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hitos i {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  transform: translateY(6px);
+}
+
+.hitos i:first-child {
+  margin-left: -2px;
+}
+
+.hitos i:last-child {
+  margin-right: -2px;
+}
+
+.corredor {
+  position: absolute;
+  top: 0;
+  left: calc(var(--avance) * 100%);
+  width: 14px;
+  margin-left: -7px;
+  line-height: 0;
+}
+
+.run {
+  width: 14px;
+  height: 16px;
+  overflow: visible;
+}
+
+.run circle {
+  fill: var(--green);
+}
+
+.run path {
+  stroke: var(--green);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  fill: none;
+}
+/* Dos fotogramas y nada mas: una carrera de dibujo animado de los noventa no
+   interpolaba, saltaba. steps(2) es exactamente eso. */
+.run-pie,
+
+.run-bra {
+  transform-box: fill-box;
+  transform-origin: top left;
+  rotate: 0deg;
+}
+.linea.corriendo .run-pie,
+
+.linea.corriendo .run-bra {
+  animation: zancada 0.42s steps(2, jump-none) infinite;
+}
+.run-pie-b,
+
+.run-bra-a {
+  animation-delay: -0.21s;
+}
+
+@keyframes zancada {
+  0% {
+    rotate: -24deg;
+  }
+  100% {
+    rotate: 26deg;
+  }
+}
 
 .dial {
   font-family: Tubo, var(--mono);
@@ -1328,5 +1438,9 @@ body:not(.dentro) .snd.mudo {
   .hint::before {
     animation: none;
     opacity: 1;
+  }
+  .run-pie,
+  .run-bra {
+    animation: none;
   }
 }

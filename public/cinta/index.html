@@ -33,19 +33,26 @@
         <div class="sigbox" id="sigbox"><svg class="sigsvg" viewBox="0 0 800 190" role="img" aria-label="Firma de David Martín"><defs><clipPath id="wipe"><rect id="wiperect" x="0" y="0" width="0" height="190"></rect></clipPath></defs><text class="sigtext" x="400" y="118" text-anchor="middle" clip-path="url(#wipe)">David Martín</text><rect class="sigline" id="sigline" x="400" y="146" width="0" height="2"></rect></svg></div>
       </div>
     </div>
-    <button class="snd" id="snd" type="button" aria-pressed="false">◎ SONIDO</button>
     <button class="skip" id="skip" type="button">SALTEAR ▸▸</button>
-    <div class="radio" id="radio" role="group" aria-label="Radio"><span class="dial" id="dial">—— FM</span>
+    <div class="radio" id="radio" role="group" aria-label="Radio">
+      <div class="linea" id="linea" aria-hidden="true"><span class="riel"></span>
+        <span class="avance" id="avance"></span>
+        <span class="hitos"><i>2020</i><i>2022</i><i>2024</i><i>2026</i></span>
+        <span class="corredor" id="corredor"><svg class="run" viewBox="0 0 26 30" aria-hidden="true" focusable="false"><circle class="run-cab" cx="15" cy="5" r="4"></circle><path class="run-cuerpo" d="M14.5 9.5 L11.5 19"></path><path class="run-bra run-bra-a" d="M13.5 12 L20 15"></path><path class="run-bra run-bra-b" d="M13.5 12.5 L7 15.5"></path><path class="run-pie run-pie-a" d="M11.5 19 L17 28"></path><path class="run-pie run-pie-b" d="M11.5 19 L5 27"></path></svg></span></div>
+      <span class="dial" id="dial">—— FM</span>
       <button id="play" type="button" aria-pressed="false">▶ PLAY</button>
       <button type="button" data-st="0">88.5</button>
       <button type="button" data-st="1">92.1</button>
       <button type="button" data-st="2">96.7</button>
-      <button type="button" data-st="3">101.3</button></div>
+      <button type="button" data-st="3">101.3</button>
+    </div>
     <main class="page" id="contenido">
       <section class="station" id="s1">
-        <p class="eyebrow">00:20:00 — 2020 · ISCAA</p>
-        <h1>La cámara.</h1>
-        <p>Técnico en Realización Integral de Cine, TV y Video. Aprendí a contar una historia antes de aprender a venderla.</p>
+        <p class="eyebrow">00:20:00 — ESCENA 01</p>
+        <p class="sello"><b>2020</b><span>ISCAA · Instituto Superior de Cine y Artes Audiovisuales</span></p>
+        <h1>Los inicios.</h1>
+        <p class="bajada">Técnico en Realización Integral de Cine, TV y Video.</p>
+        <p>Guion, cámara, iluminación, edición, color y sonido: el oficio entero, de la idea al master. Aprendí a contar una historia antes de aprender a venderla, y que sin plan de rodaje una buena idea no llega al lunes.</p>
         <button class="clap" id="clap" type="button" aria-expanded="false" aria-controls="sk1">
           <canvas class="clap-gl" id="clapgl" hidden></canvas>
           <span class="clap-plano">
@@ -58,14 +65,13 @@
           </span>
         </button>
         <ul class="skills" id="sk1">
-          <li class="n9"><span class="hab">Cámara</span><span class="nivel" aria-hidden="true"></span><b class="pct">90%</b></li>
-          <li class="n9"><span class="hab">Edición</span><span class="nivel" aria-hidden="true"></span><b class="pct">90%</b></li>
-          <li class="n8"><span class="hab">Iluminación</span><span class="nivel" aria-hidden="true"></span><b class="pct">80%</b></li>
-          <li class="n6"><span class="hab">Color</span><span class="nivel" aria-hidden="true"></span><b class="pct">60%</b></li>
-          <li class="n6"><span class="hab">Sonido</span><span class="nivel" aria-hidden="true"></span><b class="pct">60%</b></li>
-          <li class="n4"><span class="hab">Guion</span><span class="nivel" aria-hidden="true"></span><b class="pct">40%</b></li>
+          <li class="n90"><span class="hab">Cámara</span><span class="nivel" aria-hidden="true"></span><b class="pct">90%</b></li>
+          <li class="n90"><span class="hab">Edición</span><span class="nivel" aria-hidden="true"></span><b class="pct">90%</b></li>
+          <li class="n80"><span class="hab">Iluminación</span><span class="nivel" aria-hidden="true"></span><b class="pct">80%</b></li>
+          <li class="n70"><span class="hab">Color</span><span class="nivel" aria-hidden="true"></span><b class="pct">70%</b></li>
+          <li class="n70"><span class="hab">Sonido</span><span class="nivel" aria-hidden="true"></span><b class="pct">70%</b></li>
+          <li class="n55"><span class="hab">Guion</span><span class="nivel" aria-hidden="true"></span><b class="pct">55%</b></li>
         </ul>
-        <p class="hint" id="h1">TOCÁ LA CLAQUETA</p>
       </section>
       <section class="station" id="s2">
         <p class="eyebrow">00:20:06 — 2020 · WARNERMEDIA</p>

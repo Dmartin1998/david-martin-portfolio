@@ -27,10 +27,10 @@ export function crear(ac, bus) {
   let vivo = true;
   const permanentes = [];
 
-  // Submezcla propia. La radio ya esta calibrada y cuelga directo del bus; la
-  // apertura necesita 3,5 dB mas para no quedar por debajo de todo lo demas.
+  // Submezcla propia de la apertura; la radio cuelga directo del bus. Estaba
+  // en 1,5 y quedaba molesta de fuerte, asi que baja 5,5 dB.
   const propio = ac.createGain();
-  propio.gain.value = 1.5;
+  propio.gain.value = 0.8;
   propio.connect(bus);
 
   function salida() {

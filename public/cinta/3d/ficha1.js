@@ -223,16 +223,18 @@ const ICONOS = {
   }
 };
 
+// El nivel va en por ciento y la barra tiene veinte tramos: con diez, un 55 %
+// caia a mitad de un tramo y quedaba un segmento partido.
 const HABILIDADES = [
-  { icono: 'camara', nombre: 'CÁMARA', n: 9, color: '#7fe07f' },
-  { icono: 'edicion', nombre: 'EDICIÓN', n: 9, color: '#7fe07f' },
-  { icono: 'iluminacion', nombre: 'ILUMINACIÓN', n: 8, color: '#b9dd5e' },
-  { icono: 'color', nombre: 'COLOR', n: 6, color: '#e8bd52' },
-  { icono: 'sonido', nombre: 'SONIDO', n: 6, color: '#e8bd52' },
-  { icono: 'guion', nombre: 'GUION', n: 4, color: '#e0864e' }
+  { icono: 'camara', nombre: 'CÁMARA', n: 90, color: '#7fe07f' },
+  { icono: 'edicion', nombre: 'EDICIÓN', n: 90, color: '#7fe07f' },
+  { icono: 'iluminacion', nombre: 'ILUMINACIÓN', n: 80, color: '#b9dd5e' },
+  { icono: 'color', nombre: 'COLOR', n: 70, color: '#cdd45a' },
+  { icono: 'sonido', nombre: 'SONIDO', n: 70, color: '#cdd45a' },
+  { icono: 'guion', nombre: 'GUION', n: 55, color: '#e8bd52' }
 ];
 
-const BARRA = { x0: 606, ancho: 476, ranuras: 10 };
+const BARRA = { x0: 606, ancho: 476, ranuras: 20 };
 
 // Cara B: las habilidades. El fondo se dibuja una sola vez y despues cada
 // fotograma solo repinta los segmentos encendidos: redibujar la pizarra entera
@@ -256,14 +258,14 @@ function pizarraHabilidades() {
     gf.restore();
 
     escribir(gf, h.nombre, M + 140, y, 46, TIZA);
-    escribir(gf, h.n * 10 + '%', PZ.w - M - 38, y, 48, h.color, 'right');
+    escribir(gf, h.n + '%', PZ.w - M - 38, y, 48, h.color, 'right');
 
     const paso = BARRA.ancho / BARRA.ranuras;
     for (let k = 0; k < BARRA.ranuras; k++) {
       gf.globalAlpha = 0.34;
       gf.strokeStyle = APAGADO;
-      gf.lineWidth = 2.6;
-      gf.strokeRect(BARRA.x0 + k * paso, y - 17, paso * 0.74, 34);
+      gf.lineWidth = 2.2;
+      gf.strokeRect(BARRA.x0 + k * paso, y - 17, paso * 0.68, 34);
       gf.globalAlpha = 1;
     }
   });
@@ -281,11 +283,11 @@ function pizarraHabilidades() {
       const y = Y0 + i * PASO;
       // Cada fila arranca un pelin despues que la anterior.
       const p = tope((avance - i * 0.06) / 0.72, 0, 1);
-      const encendidos = Math.round(h.n * p);
+      const encendidos = Math.round((h.n / 100) * BARRA.ranuras * p);
       g.fillStyle = h.color;
       g.globalAlpha = 0.9;
       for (let k = 0; k < encendidos; k++) {
-        g.fillRect(BARRA.x0 + k * paso + 1.5, y - 15.5, paso * 0.74 - 3, 31);
+        g.fillRect(BARRA.x0 + k * paso + 1.2, y - 15.5, paso * 0.68 - 2.4, 31);
       }
       g.globalAlpha = 1;
     });
@@ -317,6 +319,126 @@ function texturaPalo() {
   }
   g.globalAlpha = 1;
   return aTextura(c);
+}
+
+/* ----------------------------------------------------------------- set -- */
+// Un fondo de estudio, pintado en un lienzo y puesto en un plano grande: un
+// ciclorama oscuro con un foco de luz detras del personaje y el piso mas claro
+// cerca. Son dos planos y tres siluetas; la atmosfera la pone la pintura, no
+// la geometria, que es lo que permite que no pese nada.
+
+function texturaSet() {
+  const [c, g] = lienzo(1024, 640);
+
+  // Pared casi negra: el fondo tiene que sugerir un espacio, no iluminarlo.
+  // El primer intento era gris azulado y se comia el negro de la pagina.
+  const pared = g.createLinearGradient(0, 0, 0, 640);
+  pared.addColorStop(0, '#07080b');
+  pared.addColorStop(0.58, '#0d0f14');
+  pared.addColorStop(1, '#14161d');
+  g.fillStyle = pared;
+  g.fillRect(0, 0, 1024, 640);
+
+  // El charco de luz del foco, detras de donde va parado.
+  const foco = g.createRadialGradient(690, 300, 20, 690, 330, 390);
+  foco.addColorStop(0, 'rgba(118, 142, 182, 0.2)');
+  foco.addColorStop(0.45, 'rgba(84, 102, 134, 0.08)');
+  foco.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  g.fillStyle = foco;
+  g.fillRect(0, 0, 1024, 640);
+
+  // Un segundo foco, mas chico y mas frio, del lado de la claqueta.
+  const frio = g.createRadialGradient(270, 260, 10, 270, 270, 260);
+  frio.addColorStop(0, 'rgba(78, 108, 150, 0.12)');
+  frio.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  g.fillStyle = frio;
+  g.fillRect(0, 0, 1024, 640);
+
+  // Grano de la pared.
+  g.globalAlpha = 0.04;
+  for (let i = 0; i < 2400; i++) {
+    g.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000';
+    g.fillRect(Math.random() * 1024, Math.random() * 640, 2, 2);
+  }
+  g.globalAlpha = 1;
+
+  // Los bordes se COMEN hasta quedar transparentes, no se pintan de negro: el
+  // plano tiene que fundirse con el fondo de la pagina y no verse como un
+  // rectangulo pegado encima.
+  g.globalCompositeOperation = 'destination-out';
+  const borde = g.createRadialGradient(512, 320, 90, 512, 320, 430);
+  borde.addColorStop(0, 'rgba(0,0,0,0)');
+  borde.addColorStop(0.5, 'rgba(0,0,0,0.42)');
+  borde.addColorStop(1, 'rgba(0,0,0,1)');
+  g.fillStyle = borde;
+  g.fillRect(0, 0, 1024, 640);
+  g.globalCompositeOperation = 'source-over';
+
+  return aTextura(c);
+}
+
+function armarSet() {
+  const set = new THREE.Group();
+
+  // A z -2,6 el cuadro mide unos 3,5 x 2,8. El plano tiene que pasarse apenas,
+  // no el triple: con 9 x 5,6 se veia solo su parte del medio y quedaba un
+  // rectangulo gris con los bordes a filo, en vez de un fondo que se funde.
+  const fondo = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.6, 3.3),
+    new THREE.MeshBasicMaterial({ map: texturaSet(), toneMapped: false, transparent: true })
+  );
+  fondo.position.set(0.1, 0.35, -2.6);
+  set.add(fondo);
+
+  const silueta = new THREE.MeshBasicMaterial({ color: 0x090a0e, toneMapped: false });
+
+  // Tripode con camara, a la izquierda y bien atras.
+  const tripode = new THREE.Group();
+  [-0.5, 0, 0.5].forEach(function (a) {
+    const pata = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.012, 1.25, 6), silueta);
+    pata.position.set(Math.sin(a) * 0.17, 0.62, Math.cos(a) * 0.17 - 0.05);
+    pata.rotation.set(Math.cos(a) * 0.16, 0, -Math.sin(a) * 0.16);
+    tripode.add(pata);
+  });
+  const cuerpoCam = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.2, 0.22), silueta);
+  cuerpoCam.position.y = 1.32;
+  tripode.add(cuerpoCam);
+  const objetivo = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.09, 0.26, 12), silueta);
+  objetivo.rotation.x = Math.PI / 2;
+  objetivo.position.set(0.02, 1.32, 0.22);
+  tripode.add(objetivo);
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.09, 0.14), silueta);
+  visor.position.set(-0.19, 1.4, -0.02);
+  tripode.add(visor);
+  tripode.position.set(-1.5, -1.35, -2.1);
+  tripode.rotation.y = 0.5;
+  set.add(tripode);
+
+  // Pie de luz con fresnel, a la derecha.
+  const pie = new THREE.Group();
+  [-0.6, 0.3, 1.2].forEach(function (a) {
+    const pata = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.01, 0.5, 6), silueta);
+    pata.position.set(Math.sin(a) * 0.14, 0.2, Math.cos(a) * 0.14);
+    pata.rotation.set(Math.cos(a) * 0.5, 0, -Math.sin(a) * 0.5);
+    pie.add(pata);
+  });
+  const mastil = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.028, 1.6, 8), silueta);
+  mastil.position.y = 1;
+  pie.add(mastil);
+  const farol = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.21, 0.26, 12), silueta);
+  farol.rotation.z = Math.PI / 2;
+  farol.position.set(-0.1, 1.76, 0);
+  pie.add(farol);
+  [1, -1].forEach(function (s) {
+    const visera = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.3), silueta);
+    visera.position.set(-0.24, 1.76 + s * 0.17, 0);
+    visera.rotation.set(0, Math.PI / 2, s * 0.45);
+    pie.add(visera);
+  });
+  pie.position.set(1.8, -1.4, -2.3);
+  set.add(pie);
+
+  return set;
 }
 
 /* ---------------------------------------------------------------- placa -- */
@@ -446,6 +568,8 @@ export function montar(lienzoGL, opciones) {
   contra.position.set(1.4, 2.1, -2.8);
   escena.add(contra);
 
+  escena.add(armarSet());
+
   const texDatos = pizarraDatos();
   const habilidades = pizarraHabilidades();
   const cl = armarClaqueta(texDatos);
@@ -474,7 +598,7 @@ export function montar(lienzoGL, opciones) {
   });
 
   const aro = new THREE.Mesh(
-    new THREE.TorusGeometry(0.37, 0.008, 6, 44),
+    new THREE.TorusGeometry(0.28, 0.0075, 6, 44),
     new THREE.MeshBasicMaterial({ color: 0x7fe07f, transparent: true, opacity: 0 })
   );
   escena.add(aro);
@@ -495,7 +619,7 @@ export function montar(lienzoGL, opciones) {
     camara.lookAt(MIRA);
     camara.updateProjectionMatrix();
     // En vertical el cuadro es mas angosto y la claqueta se iba por el borde.
-    EN_REPOSO.x = angosto ? -0.28 : -0.37;
+    EN_REPOSO.x = angosto ? -0.26 : -0.35;
     if (!abierta && !transicion && !vuelo && entrada >= 1) claqueta.position.x = EN_REPOSO.x;
     if (abierta && !transicion) {
       const f = encuadreAbierto();
@@ -508,7 +632,7 @@ export function montar(lienzoGL, opciones) {
   // El modelo tiene las manos en los bolsillos y no trae esqueleto, asi que no
   // la puede sostener: se posa a su lado y flota, que ademas le va bien a una
   // pagina que es el sueno de una cinta.
-  const EN_REPOSO = new THREE.Vector3(-0.37, 0.31, 0.4);
+  const EN_REPOSO = new THREE.Vector3(-0.35, 0.31, 0.4);
   // medir() las lee, y medir() corre antes de que se declaren mas abajo.
   var abierta = false, transicion = null, vuelo = 0, entrada = quieto ? 1 : -1;
   const GIRO_REPOSO = new THREE.Euler(-0.08, 0.26, 0.05);
@@ -597,7 +721,7 @@ export function montar(lienzoGL, opciones) {
       claqueta.getWorldPosition(aro.position);
       aro.position.y -= ALTO_CL / 2;
       aro.lookAt(camara.position);
-      const s = 0.78 + ciclo * 0.62;
+      const s = 0.62 + ciclo * 0.43;
       aro.scale.set(s, s, s);
       aro.material.opacity = (1 - ciclo) * 0.55;
     } else {
