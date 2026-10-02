@@ -1,0 +1,47 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-10-01T12:00:00Z" },
+  "title": "Propuesta de rediseño — Portfolio David Martín",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 1700, "title": "Diagnóstico y propuesta" },
+    "Sistema.dc.html": { "x": 1360, "y": 0, "w": 1280, "h": 1100, "title": "Sistema visual" },
+    "Hero-Nuevo.dc.html": { "x": 0, "y": 2100, "w": 1440, "h": 900, "title": "Hero propuesto · 1440" },
+    "Caso-Odoo.dc.html": { "x": 1520, "y": 2100, "w": 1440, "h": 1000, "title": "Caso con evidencia" },
+    "Movil.dc.html": { "x": 0, "y": 3500, "w": 390, "h": 844, "title": "Hero móvil · 390 (bug corregido)" },
+    "Plan.dc.html": { "x": 470, "y": 3500, "w": 1280, "h": 900, "title": "Plan de ejecución" }
+  },
+  "order": [
+    "Main.dc.html",
+    "Sistema.dc.html",
+    "Hero-Nuevo.dc.html",
+    "Caso-Odoo.dc.html",
+    "Movil.dc.html",
+    "Plan.dc.html"
+  ],
+  "notes": {
+    "n1": {
+      "x": 0,
+      "y": -300,
+      "text": "01 · Diagnóstico y sistema visual",
+      "kind": "title1",
+      "maxW": 2640
+    },
+    "n2": {
+      "x": 0,
+      "y": 1850,
+      "text": "02 · Cómo se vería",
+      "kind": "title1",
+      "maxW": 2960
+    },
+    "n3": {
+      "x": 0,
+      "y": 3250,
+      "text": "03 · Móvil y plan",
+      "kind": "title1",
+      "maxW": 1750
+    }
+  },
+  "designSystems": []
+}

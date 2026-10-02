@@ -164,10 +164,22 @@
       })();
       if (!hayGL) { reveal(); return; }
 
+      // Mientras la escena siga avisando en que tramo esta, esta viva. El
+      // plazo se mide entre pasos y no contra el total: un equipo lento tarda
+      // mas pero no se queda mudo, y cortar la apertura en el ultimo plano
+      // seria peor que esperarla. El tramo mas largo son 2,6 s.
+      var guardia = null;
+      function vigilar() {
+        clearTimeout(guardia);
+        guardia = setTimeout(reveal, 6500);
+        relojes.push(guardia);
+      }
+
       import('/cinta/3d/escena3d.js')
         .then(function (mod) {
           return mod.montar(lienzo, reveal, function (n) {
             ultimoPaso = n;
+            vigilar();
             if (son) son.paso(n);
           });
         })
@@ -176,7 +188,7 @@
           sigbox.classList.add('gone');
           lienzo.classList.add('on');
           clearTimeout(respaldo);
-          relojes.push(setTimeout(reveal, 14000));
+          vigilar();
           return escena.secuencia();
         })
         .catch(function () { reveal(); });
