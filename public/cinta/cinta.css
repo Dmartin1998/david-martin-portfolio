@@ -624,7 +624,7 @@ body:not(.dentro) .snd.mudo {
 .skills li {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 11px;
   font-family: var(--mono);
   font-size: 12px;
   color: var(--phos);
@@ -634,21 +634,21 @@ body:not(.dentro) .snd.mudo {
 }
 
 .hab {
-  flex: 0 0 92px;
+  flex: 0 0 90px;
   letter-spacing: 0.04em;
 }
-/* Barra segmentada, como el vumetro de una consola. Sin numero al lado: un
-   porcentaje en una habilidad propia promete una precision que no existe.
-   Los segmentos se dibujan con un mosaico del 10 %, asi que la barra se
-   estira con la columna sin perder la cuenta, y lo que se anima es el
-   recorte, que no reflow nada. */
+/* Barra segmentada, como el vumetro de una consola, y el numero al lado. El
+   color va del verde al naranja segun el nivel, que es lo que hace que se lea
+   de un vistazo sin tener que comparar largos.
+   Los segmentos se dibujan con un mosaico del 10 %, asi que la barra se estira
+   con la columna sin perder la cuenta, y lo que se anima es el recorte, que no
+   reflow nada. */
 
 .nivel {
-  --n: 0%;
   position: relative;
   flex: 1 1 auto;
-  max-width: 168px;
-  height: 11px;
+  max-width: 158px;
+  height: 12px;
   background-image: linear-gradient(to right, var(--line) 0 72%, transparent 72%);
   background-size: 10% 100%;
 }
@@ -657,7 +657,7 @@ body:not(.dentro) .snd.mudo {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(to right, var(--phos) 0 72%, transparent 72%);
+  background-image: linear-gradient(to right, var(--c) 0 72%, transparent 72%);
   background-size: 10% 100%;
   clip-path: inset(0 100% 0 0);
   transition: clip-path 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) 0.15s;
@@ -667,20 +667,32 @@ body:not(.dentro) .snd.mudo {
   clip-path: inset(0 calc(100% - var(--n)) 0 0);
 }
 
+.pct {
+  flex: 0 0 38px;
+  text-align: right;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--c);
+}
+
 .n4 {
   --n: 40%;
+  --c: #e0864e;
 }
 
 .n6 {
   --n: 60%;
+  --c: #e8bd52;
 }
 
 .n8 {
   --n: 80%;
+  --c: #b4dd5e;
 }
 
 .n9 {
   --n: 90%;
+  --c: #6ee07f;
 }
 
 .station.on .skills li {
@@ -714,7 +726,6 @@ body:not(.dentro) .snd.mudo {
 
 .clap {
   width: 100%;
-  max-width: 560px;
   margin-top: 18px;
   user-select: none;
   background: none;
