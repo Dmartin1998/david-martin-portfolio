@@ -255,6 +255,23 @@ export function crear(ac, bus) {
       cuerpo(t, { frec: 70, hasta: 210, dur: 1.5, vol: 0.08, atk: 0.9 });
     },
 
+    /* ---- ficha 01 ---- */
+
+    // La claqueta entra volando desde fuera de cuadro y cae en la palma.
+    vuelo: function (t) {
+      soplo(t, { dur: 1.42, desde: 260, hasta: 2300, q: 0.5, vol: 0.08, atk: 0.9 });
+      chasquido(t + 1.5, 0.3);
+      cuerpo(t + 1.5, { frec: 124, hasta: 52, dur: 0.15, vol: 0.15 });
+    },
+
+    // El golpe del palo, que es el sonido que le da nombre al oficio. Cae a
+    // los 0,18 s, que es cuando el palo toca abajo en la escena.
+    claqueta: function (t) {
+      chasquido(t + 0.18, 0.5);
+      cuerpo(t + 0.18, { frec: 330, hasta: 112, dur: 0.14, vol: 0.22 });
+      soplo(t + 0.19, { dur: 0.28, desde: 3600, hasta: 950, q: 0.8, vol: 0.15 });
+    },
+
     // Ya adentro: la imagen se asienta y queda el zumbido de fondo.
     fin: function (t) {
       soplo(t, { dur: 0.22, desde: 3000, hasta: 900, q: 0.9, vol: 0.13 });

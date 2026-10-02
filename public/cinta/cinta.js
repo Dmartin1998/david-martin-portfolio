@@ -129,6 +129,18 @@
 
   skip.addEventListener('click', reveal);
 
+  // Una sola prueba de WebGL para todo el archivo: la usan la apertura y la
+  // ficha 01, y crear un contexto para tirarlo no es gratis en movil.
+  var hayGL = null;
+  function conGL() {
+    if (hayGL === null) {
+      try {
+        hayGL = !!document.createElement('canvas').getContext('webgl2');
+      } catch (e) { hayGL = false; }
+    }
+    return hayGL;
+  }
+
   var yaVista = false;
   try { yaVista = sessionStorage.getItem('cinta-vista') === '1'; } catch (e) {}
 
@@ -157,12 +169,7 @@
 
     luego(2100, function () {
       var lienzo = $('gl');
-      var hayGL = (function () {
-        try {
-          return !!document.createElement('canvas').getContext('webgl2');
-        } catch (e) { return false; }
-      })();
-      if (!hayGL) { reveal(); return; }
+      if (!conGL()) { reveal(); return; }
 
       // Mientras la escena siga avisando en que tramo esta, esta viva. El
       // plazo se mide entre pasos y no contra el total: un equipo lento tarda
@@ -219,14 +226,47 @@
 
   /* ---------------------------------------------------------- 01 claqueta */
 
-  var clap = $('clap'), s1 = $('s1'), h1 = $('h1');
+  var clap = $('clap'), s1 = $('s1'), h1 = $('h1'), clapgl = $('clapgl');
+  var ficha = null, montando = false;
+
   clap.addEventListener('click', function () {
     var on = clap.classList.toggle('on');
     s1.classList.toggle('on', on);
     clap.setAttribute('aria-expanded', String(on));
-    h1.textContent = on ? '▸ ESCENA 01 — HABILIDADES' : '▸ TOCÁ LA CLAQUETA';
-    if (on) blip(880);
+    h1.textContent = on ? 'ESCENA 01 — HABILIDADES' : 'TOCÁ LA CLAQUETA';
+    if (ficha) { if (on) ficha.abrir(); else ficha.cerrar(); }
+    if (on) {
+      blip(880);
+      if (son) son.paso('claqueta');
+    }
   });
+
+  // La escena de la ficha se monta recien cuando aparece en pantalla: no tiene
+  // sentido pelearle la GPU a la apertura por algo que todavia nadie ve. Y
+  // cuando se va de pantalla deja de dibujar, que es la mitad del costo.
+  if (conGL() && window.IntersectionObserver) {
+    var mirar = new IntersectionObserver(function (entradas) {
+      var dentro = entradas[0].isIntersecting;
+
+      if (ficha) { ficha.visible(dentro); if (dentro) ficha.entrar(); return; }
+      if (!dentro || montando) return;
+
+      montando = true;
+      import('/cinta/3d/ficha1.js')
+        .then(function (mod) {
+          ficha = mod.montar(clapgl, { quieto: reduce });
+          clapgl.hidden = false;
+          clap.classList.add('en3d');
+          requestAnimationFrame(function () { clapgl.classList.add('on'); });
+          // Si alguien ya la abrio con el teclado antes de que cargara, la
+          // escena arranca abierta en vez de reproducir la entrada.
+          if (clap.classList.contains('on')) { ficha.abrir(); return; }
+          if (ficha.entrar() && son) son.paso('vuelo');
+        })
+        .catch(function () { montando = false; });
+    }, { rootMargin: '160px 0px', threshold: 0.01 });
+    mirar.observe(clap);
+  }
 
   /* ------------------------------------------------------------ 02 grilla */
 
