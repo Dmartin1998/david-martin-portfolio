@@ -1,6 +1,18 @@
-// Ficha 01 en 3D: la claqueta entra girando desde fuera de cuadro, cae en la
-// mano, y al tocarla el palo golpea y la pizarra se reescribe con las
-// habilidades, de frente y ocupando casi todo el lienzo.
+// Ficha 01 en 3D: la claqueta entra girando desde fuera de cuadro, se posa
+// junto al personaje, y al tocarla el palo golpea y la pizarra se reescribe
+// con las habilidades, de frente y ocupando casi todo el lienzo.
+//
+// El personaje es david.glb, un modelo esculpido. Viene con la iluminacion
+// horneada en la textura (KHR_materials_unlit), asi que no reacciona a las
+// luces de la escena: se ve igual en cualquier maquina, que es justo lo que se
+// quiere de un retrato. Tiene las manos en los bolsillos y no trae esqueleto,
+// de modo que la pose es la que es: la claqueta no se sostiene, se posa al
+// lado y flota. Las luces que hay son para la claqueta, que si las usa.
+//
+// El modelo original pesaba 13 MB. Quedo en 1,1: la textura paso a WebP de
+// 1280, la malla se simplifico al 45 % con los bordes bloqueados y todo va
+// comprimido con meshopt. Se carga en diferido, recien cuando la ficha
+// aparece en pantalla.
 //
 // Las habilidades van dibujadas DENTRO de la pizarra, no debajo. Se dibujan en
 // el mismo lienzo que el resto del rotulo, asi que acompanan a la claqueta
@@ -8,34 +20,19 @@
 // HTML con la camara. La lista de verdad sigue en el HTML, escondida a la
 // vista pero intacta para un lector de pantalla.
 //
-// El personaje esta en proporciones de muneco y pintado con colores planos:
-// la campera se arma con una pieza por color, no con una textura. Las texturas
-// de bloques quedaban como ruido a este tamano. Lo que da el aire de personaje
-// 3D no es la cantidad de poligonos sino la cabeza grande, las formas sin un
-// solo canto vivo, el color plano y la luz blanda con sombra propia.
-//
-// Es geometria generada: cero bytes de descarga, ni un modelo.
-//
 // Aca no hay pase de post-proceso: la pagina entera ya vive dentro del tubo,
 // asi que el lienzo se dibuja transparente y hereda el tratamiento del sitio.
 
 import * as THREE from './three.module.min.js';
+import { GLTFLoader } from './GLTFLoader.js';
+import { MeshoptDecoder } from './meshopt_decoder.module.js';
+
+const RUTA = '/cinta/3d/david.glb';
 
 const suave = (t) => t * t * (3 - 2 * t);
 const mezcla = (a, b, t) => a + (b - a) * t;
 const frenar = (t) => 1 - Math.pow(1 - t, 3);
 const tope = (v, a, b) => Math.max(a, Math.min(b, v));
-
-const PIEL = 0xe8b08c;
-const PELO = 0x2b1f18;
-const TEAL = 0x1e6b74;
-const MAGENTA = 0x8e2560;
-const VIOLETA = 0x4e3192;
-const CASI_NEGRO = 0x17171d;
-
-// Donde sostiene la claqueta, en coordenadas del personaje.
-const MANO_SOSTIENE = new THREE.Vector3(-0.53, 0.6, 0.2);
-const GUIA_IZQ = new THREE.Vector3(-1, -0.4, -0.5);
 
 function mate(color, aspereza) {
   return new THREE.MeshStandardMaterial({
@@ -46,7 +43,6 @@ function mate(color, aspereza) {
 }
 
 /* -------------------------------------------------------------- pizarra -- */
-// Las dos caras del rotulo: los datos de rodaje y las habilidades.
 
 const PZ = { w: 1280, h: 1016, m: 46 };
 const TIZA = '#eceadf';
@@ -107,7 +103,6 @@ function escribir(g, s, x, y, tam, color, alinear) {
   g.restore();
 }
 
-// Fondo comun: acrilico oscuro, veta, marco y polvo.
 function fondoPizarra(g) {
   g.fillStyle = '#16171c';
   g.fillRect(0, 0, PZ.w, PZ.h);
@@ -173,11 +168,9 @@ function pizarraDatos() {
   return aTextura(c);
 }
 
-/* ---- los iconos, dibujados con el mismo pulso que el resto del rotulo ---- */
-// Cada uno cabe en una caja de 64 centrada en el origen.
+/* ---- los iconos, con el mismo pulso que el resto del rotulo ---- */
 
 const ICONOS = {
-  // Camara de cine: cuerpo, objetivo y los dos rollos arriba.
   camara: function (g, col) {
     trazo(g, [[-30, -12], [12, -12], [12, 18], [-30, 18], [-30, -12]], 4, col);
     trazo(g, [[12, -2], [30, -12], [30, 20], [12, 10], [12, -2]], 4, col);
@@ -187,7 +180,6 @@ const ICONOS = {
     g.beginPath(); g.arc(-9, 3, 7, 0, 7); g.stroke();
     g.globalAlpha = 1;
   },
-  // Tijera de montaje.
   edicion: function (g, col) {
     trazo(g, [[-24, -26], [10, 14]], 4, col);
     trazo(g, [[24, -26], [-10, 14]], 4, col);
@@ -196,7 +188,6 @@ const ICONOS = {
     g.beginPath(); g.arc(15, 22, 9, 0, 7); g.stroke();
     g.globalAlpha = 1;
   },
-  // Fresnel con viseras.
   iluminacion: function (g, col) {
     trazo(g, [[-18, -16], [18, -16], [26, 16], [-26, 16], [-18, -16]], 4, col);
     trazo(g, [[-18, -16], [-30, -30]], 4, col);
@@ -204,7 +195,6 @@ const ICONOS = {
     trazo(g, [[-10, 16], [-10, 28]], 4, col);
     trazo(g, [[10, 16], [10, 28]], 4, col);
   },
-  // Tres circulos que se pisan: la rueda de color.
   color: function (g, col) {
     g.strokeStyle = col; g.lineWidth = 3.6; g.globalAlpha = 0.9;
     [[0, -12], [-13, 10], [13, 10]].forEach(function (p) {
@@ -212,15 +202,12 @@ const ICONOS = {
     });
     g.globalAlpha = 1;
   },
-  // Onda de audio.
   sonido: function (g, col) {
-    const alturas = [8, 20, 30, 14, 26, 10, 18];
-    alturas.forEach(function (h, i) {
+    [8, 20, 30, 14, 26, 10, 18].forEach(function (h, i) {
       const x = -30 + i * 10;
       trazo(g, [[x, -h], [x, h]], 4.2, col);
     });
   },
-  // Lapiz sobre renglon.
   guion: function (g, col) {
     trazo(g, [[-26, 20], [12, -18]], 4.4, col);
     trazo(g, [[12, -18], [22, -28], [30, -20], [20, -10]], 4, col);
@@ -242,9 +229,8 @@ const HABILIDADES = [
 const BARRA = { x0: 606, ancho: 476, ranuras: 10 };
 
 // Cara B: las habilidades. El fondo se dibuja una sola vez y despues cada
-// fotograma solo repinta los segmentos encendidos, que son sesenta rectangulos:
-// redibujar la pizarra entera sesenta veces por segundo seria tirar la GPU por
-// la ventana para animar unas barras.
+// fotograma solo repinta los segmentos encendidos: redibujar la pizarra entera
+// sesenta veces por segundo seria tirar la GPU por la ventana.
 function pizarraHabilidades() {
   const [fondo, gf] = lienzo(PZ.w, PZ.h);
   fondoPizarra(gf);
@@ -258,7 +244,6 @@ function pizarraHabilidades() {
 
   HABILIDADES.forEach(function (h, i) {
     const y = Y0 + i * PASO;
-
     gf.save();
     gf.translate(M + 78, y);
     ICONOS[h.icono](gf, h.color);
@@ -267,14 +252,12 @@ function pizarraHabilidades() {
     escribir(gf, h.nombre, M + 140, y, 46, TIZA);
     escribir(gf, h.n * 10 + '%', PZ.w - M - 38, y, 48, h.color, 'right');
 
-    // Las ranuras vacias.
     const paso = BARRA.ancho / BARRA.ranuras;
     for (let k = 0; k < BARRA.ranuras; k++) {
-      const x = BARRA.x0 + k * paso;
       gf.globalAlpha = 0.34;
       gf.strokeStyle = APAGADO;
       gf.lineWidth = 2.6;
-      gf.strokeRect(x, y - 17, paso * 0.74, 34);
+      gf.strokeRect(BARRA.x0 + k * paso, y - 17, paso * 0.74, 34);
       gf.globalAlpha = 1;
     }
   });
@@ -284,7 +267,6 @@ function pizarraHabilidades() {
   const [c, g] = lienzo(PZ.w, PZ.h);
   const tex = aTextura(c);
 
-  // avance de 0 a 1: cuantos segmentos ya se encendieron.
   function dibujar(avance) {
     g.clearRect(0, 0, PZ.w, PZ.h);
     g.drawImage(fondo, 0, 0);
@@ -295,8 +277,8 @@ function pizarraHabilidades() {
       const p = tope((avance - i * 0.06) / 0.72, 0, 1);
       const encendidos = Math.round(h.n * p);
       g.fillStyle = h.color;
+      g.globalAlpha = 0.9;
       for (let k = 0; k < encendidos; k++) {
-        g.globalAlpha = 0.9;
         g.fillRect(BARRA.x0 + k * paso + 1.5, y - 15.5, paso * 0.74 - 3, 31);
       }
       g.globalAlpha = 1;
@@ -308,7 +290,6 @@ function pizarraHabilidades() {
   return { tex: tex, dibujar: dibujar };
 }
 
-// El palo: diagonales gastadas, con la pintura saltada.
 function texturaPalo() {
   const [c, g] = lienzo(1200, 150);
   g.fillStyle = '#17161b';
@@ -333,10 +314,9 @@ function texturaPalo() {
 }
 
 /* ---------------------------------------------------------------- placa -- */
-// Rectangulo con las puntas redondeadas y el canto biselado. Ojo: el bisel
-// agranda la pieza BISEL en cada lado, asi que el alto real es el nominal mas
-// dos biseles. No tenerlo en cuenta dejaba un hueco entre el palo y la banda y
-// hacia que la claqueta se saliera del lienzo por arriba.
+// Ojo: el bisel agranda la pieza BISEL en cada lado, asi que el alto real es
+// el nominal mas dos biseles. No tenerlo en cuenta dejaba un hueco entre el
+// palo y la banda y hacia que la claqueta se saliera del lienzo por arriba.
 
 const BISEL = 0.006;
 
@@ -360,291 +340,7 @@ function placa(ancho, alto, radio, fondo) {
   return g;
 }
 
-// Cara del extrudido: va por delante del bisel, no a la mitad del fondo.
 const caraZ = (fondo) => fondo / 2 + BISEL + 0.0025;
-
-/* ---------------------------------------------------- cinematica inversa -- */
-// Dos huesos: se le dice donde va la mano y acomoda hombro y antebrazo. El
-// vector guia decide para que lado sale el codo.
-
-const ABAJO = new THREE.Vector3(0, -1, 0);
-
-function apuntarBrazo(brazo, destino, guia) {
-  const L1 = brazo.largos[0], L2 = brazo.largos[1];
-  const v = destino.clone().sub(brazo.hombro.position);
-  const D = tope(v.length(), Math.abs(L1 - L2) + 0.01, (L1 + L2) * 0.99);
-  const dir = v.clone().normalize();
-
-  const alfa = Math.acos(tope((L1 * L1 + D * D - L2 * L2) / (2 * L1 * D), -1, 1));
-  const gama = Math.acos(tope((L1 * L1 + L2 * L2 - D * D) / (2 * L1 * L2), -1, 1));
-
-  const eje = new THREE.Vector3().crossVectors(dir, guia);
-  if (eje.lengthSq() < 1e-6) eje.set(0, 0, 1);
-  eje.normalize();
-
-  brazo.hombro.quaternion.setFromUnitVectors(ABAJO, dir.clone().applyAxisAngle(eje, -alfa));
-  const ejeLocal = eje.clone().applyQuaternion(brazo.hombro.quaternion.clone().invert());
-  brazo.codo.quaternion.setFromAxisAngle(ejeLocal, Math.PI - gama);
-}
-
-/* ------------------------------------------------------------ personaje -- */
-
-function armarPersona() {
-  const persona = new THREE.Group();
-
-  const piel = mate(PIEL, 0.74);
-  const pelo = mate(PELO, 0.88);
-  const teal = mate(TEAL, 0.52);
-  const magenta = mate(MAGENTA, 0.52);
-  const violeta = mate(VIOLETA, 0.52);
-  const negro = mate(CASI_NEGRO, 0.6);
-  const algodon = mate(0xe2dfd4, 0.92);
-  const pantalon = mate(0x2b2c34, 0.9);
-  const suelaMat = mate(0xd8d4c8, 0.8);
-  const metal = new THREE.MeshStandardMaterial({ color: 0xcdbb9a, roughness: 0.26, metalness: 0.92 });
-
-  /* ---- piernas y zapatillas ---- */
-  [-1, 1].forEach(function (s) {
-    const pierna = new THREE.Mesh(new THREE.CapsuleGeometry(0.088, 0.22, 6, 20), pantalon);
-    pierna.position.set(s * 0.115, 0.3, 0);
-    persona.add(pierna);
-
-    const zapa = new THREE.Mesh(new THREE.CapsuleGeometry(0.085, 0.11, 6, 20), negro);
-    zapa.rotation.x = Math.PI / 2;
-    zapa.scale.set(1, 1, 0.76);
-    zapa.position.set(s * 0.115, 0.08, 0.05);
-    persona.add(zapa);
-
-    const suela = new THREE.Mesh(new THREE.CapsuleGeometry(0.083, 0.11, 5, 18), suelaMat);
-    suela.rotation.x = Math.PI / 2;
-    suela.scale.set(1, 1, 0.4);
-    suela.position.set(s * 0.115, 0.036, 0.05);
-    persona.add(suela);
-  });
-
-  /* ---- tronco: la campera por piezas, no por textura ---- */
-  const torso = new THREE.Group();
-
-  const cuerpo = new THREE.Mesh(new THREE.CapsuleGeometry(0.198, 0.2, 8, 28), teal);
-  cuerpo.scale.z = 0.8;
-  cuerpo.position.y = 0.63;
-  torso.add(cuerpo);
-
-  // Peto magenta: el panel del pecho de una rompeviento.
-  const peto = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2, 28, 20, Math.PI * 0.72, Math.PI * 0.56, Math.PI * 0.26, Math.PI * 0.46),
-    magenta
-  );
-  peto.scale.set(1.012, 1.012, 0.812);
-  peto.position.y = 0.655;
-  torso.add(peto);
-
-  // Franja violeta cruzada abajo.
-  const franja = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.2, 0.2, 0.062, 28, 1, true, Math.PI * 0.62, Math.PI * 0.76),
-    violeta
-  );
-  franja.scale.z = 0.805;
-  franja.position.y = 0.53;
-  franja.material.side = THREE.DoubleSide;
-  torso.add(franja);
-
-  // La remera asoma entre las solapas.
-  const remera = new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.022, 0.19, 18), algodon);
-  remera.scale.set(1, 1, 0.42);
-  remera.position.set(0, 0.7, 0.142);
-  torso.add(remera);
-
-  // Cuello alto de rompeviento, y el elastico de la cintura.
-  const cuello = new THREE.Mesh(new THREE.CylinderGeometry(0.113, 0.146, 0.1, 24, 1, true), negro);
-  cuello.scale.z = 0.86;
-  cuello.position.y = 0.79;
-  cuello.material.side = THREE.DoubleSide;
-  torso.add(cuello);
-
-  const gola = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.021, 8, 26), negro);
-  gola.rotation.x = Math.PI / 2;
-  gola.scale.z = 0.86;
-  gola.position.y = 0.835;
-  torso.add(gola);
-
-  const elastico = new THREE.Mesh(new THREE.CylinderGeometry(0.192, 0.186, 0.05, 28), negro);
-  elastico.scale.z = 0.81;
-  elastico.position.y = 0.455;
-  torso.add(elastico);
-
-  persona.add(torso);
-
-  /* ---- cabeza ---- */
-  const cabeza = new THREE.Group();
-  cabeza.position.y = 1.15;
-
-  const craneo = new THREE.Mesh(new THREE.SphereGeometry(0.265, 40, 32), piel);
-  craneo.scale.set(1, 1.04, 0.95);
-  cabeza.add(craneo);
-
-  const pescuezo = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.07, 5, 16), piel);
-  pescuezo.position.y = -0.245;
-  cabeza.add(pescuezo);
-
-  // Pelo: casquete y cinco bochas grandes. Con muchas bochas chicas quedaba
-  // un coliflor; con pocas y grandes queda pelo.
-  const casco = new THREE.Mesh(
-    new THREE.SphereGeometry(0.273, 36, 24, 0, Math.PI * 2, 0, Math.PI * 0.54), pelo
-  );
-  casco.scale.set(1.01, 1.09, 1);
-  casco.position.set(0, 0.016, -0.014);
-  cabeza.add(casco);
-
-  [
-    [0, 0.218, 0.09, 0.125], [-0.148, 0.185, 0.015, 0.108], [0.148, 0.185, 0.015, 0.108],
-    [0, 0.2, -0.145, 0.115], [0.015, 0.258, -0.03, 0.112]
-  ].forEach(function (b) {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(b[3], 24, 18), pelo);
-    m.position.set(b[0], b[1], b[2]);
-    cabeza.add(m);
-  });
-
-  // Barba. Antes era una esfera ancha y leia como un barbijo cruzado en la
-  // cara. Ahora es la masa del menton mas dos lineas de mandibula que suben a
-  // las patillas: eso deja los pomulos a la vista y se lee como barba.
-  const masa = new THREE.Mesh(new THREE.SphereGeometry(0.168, 30, 24), pelo);
-  masa.scale.set(1.08, 0.76, 0.88);
-  masa.position.set(0, -0.138, 0.062);
-  cabeza.add(masa);
-
-  [-1, 1].forEach(function (s) {
-    const mandibula = new THREE.Mesh(new THREE.CapsuleGeometry(0.042, 0.14, 6, 16), pelo);
-    mandibula.position.set(s * 0.158, -0.098, 0.052);
-    mandibula.rotation.set(0.3, 0, s * 0.95);
-    mandibula.scale.z = 0.82;
-    cabeza.add(mandibula);
-
-    const patilla = new THREE.Mesh(new THREE.CapsuleGeometry(0.038, 0.1, 5, 14), pelo);
-    patilla.position.set(s * 0.226, 0.012, -0.012);
-    patilla.scale.z = 0.76;
-    cabeza.add(patilla);
-  });
-
-  const bigote = new THREE.Mesh(new THREE.SphereGeometry(0.07, 20, 16), pelo);
-  bigote.scale.set(1.18, 0.4, 0.58);
-  bigote.position.set(0, -0.082, 0.229);
-  cabeza.add(bigote);
-
-  const nariz = new THREE.Mesh(new THREE.SphereGeometry(0.047, 22, 18), piel);
-  nariz.scale.set(0.96, 0.9, 1.05);
-  nariz.position.set(0, -0.014, 0.256);
-  cabeza.add(nariz);
-
-  const iris = new THREE.MeshStandardMaterial({ color: 0x1a120d, roughness: 0.18 });
-  const chispa = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  [-1, 1].forEach(function (s) {
-    const ojo = new THREE.Mesh(new THREE.SphereGeometry(0.043, 22, 18), iris);
-    ojo.scale.set(0.86, 1.06, 0.6);
-    ojo.position.set(s * 0.098, 0.05, 0.233);
-    cabeza.add(ojo);
-
-    const luz = new THREE.Mesh(new THREE.SphereGeometry(0.012, 12, 10), chispa);
-    luz.position.set(s * 0.086, 0.072, 0.254);
-    cabeza.add(luz);
-
-    const ceja = new THREE.Mesh(new THREE.CapsuleGeometry(0.016, 0.068, 5, 12), pelo);
-    ceja.rotation.z = Math.PI / 2 + s * 0.16;
-    ceja.position.set(s * 0.1, 0.128, 0.227);
-    cabeza.add(ceja);
-
-    const oreja = new THREE.Mesh(new THREE.SphereGeometry(0.054, 18, 14), piel);
-    oreja.scale.set(0.42, 1.05, 0.82);
-    oreja.position.set(s * 0.262, -0.014, -0.004);
-    cabeza.add(oreja);
-  });
-
-  /* ---- anteojos ---- */
-  const gafas = new THREE.Group();
-  [-1, 1].forEach(function (s) {
-    const aro = new THREE.Mesh(new THREE.TorusGeometry(0.072, 0.0082, 10, 32), metal);
-    aro.position.set(s * 0.1, 0.05, 0.235);
-    aro.scale.z = 0.6;
-    gafas.add(aro);
-
-    const cristal = new THREE.Mesh(
-      new THREE.CircleGeometry(0.069, 26),
-      new THREE.MeshStandardMaterial({
-        color: 0xa9c0d4, roughness: 0.06, metalness: 0.1, transparent: true, opacity: 0.13
-      })
-    );
-    cristal.position.set(s * 0.1, 0.05, 0.239);
-    gafas.add(cristal);
-
-    const patilla = new THREE.Mesh(new THREE.CapsuleGeometry(0.0072, 0.14, 4, 10), metal);
-    patilla.rotation.set(Math.PI / 2, s * 0.55, 0);
-    patilla.position.set(s * 0.196, 0.054, 0.152);
-    gafas.add(patilla);
-  });
-  const puente = new THREE.Mesh(new THREE.CapsuleGeometry(0.0062, 0.04, 4, 10), metal);
-  puente.rotation.z = Math.PI / 2;
-  puente.position.set(0, 0.06, 0.237);
-  gafas.add(puente);
-  cabeza.add(gafas);
-
-  persona.add(cabeza);
-
-  /* ---- brazos ---- */
-  // Una manga por color, y el puno como un anillo apoyado, no flotando: antes
-  // el toro quedaba suelto en el aire cuando el brazo se estiraba.
-  function brazo(lado, colorManga) {
-    const L1 = 0.185, L2 = 0.19;
-    const hombro = new THREE.Group();
-    hombro.position.set(lado * 0.192, 0.73, 0);
-
-    const bola = new THREE.Mesh(new THREE.SphereGeometry(0.082, 20, 16), colorManga);
-    hombro.add(bola);
-
-    const superior = new THREE.Mesh(new THREE.CapsuleGeometry(0.072, L1 - 0.06, 6, 18), colorManga);
-    superior.position.y = -L1 / 2;
-    hombro.add(superior);
-
-    const codo = new THREE.Group();
-    codo.position.y = -L1;
-    hombro.add(codo);
-
-    const antebrazo = new THREE.Mesh(new THREE.CapsuleGeometry(0.066, L2 - 0.06, 6, 18), colorManga);
-    antebrazo.position.y = -L2 / 2;
-    codo.add(antebrazo);
-
-    const puno = new THREE.Mesh(new THREE.CylinderGeometry(0.069, 0.066, 0.045, 20), negro);
-    puno.position.y = -L2 + 0.012;
-    codo.add(puno);
-
-    const mano = new THREE.Group();
-    mano.position.y = -L2 - 0.05;
-    codo.add(mano);
-
-    const palma = new THREE.Mesh(new THREE.SphereGeometry(0.086, 22, 18), piel);
-    palma.scale.set(1, 0.9, 0.82);
-    mano.add(palma);
-
-    const pulgar = new THREE.Mesh(new THREE.CapsuleGeometry(0.027, 0.045, 4, 12), piel);
-    pulgar.position.set(lado * -0.06, 0.026, 0.034);
-    pulgar.rotation.set(0.5, 0, lado * 1.1);
-    mano.add(pulgar);
-
-    return { hombro: hombro, codo: codo, mano: mano, largos: [L1, L2 + 0.05] };
-  }
-
-  const izq = brazo(-1, magenta);
-  const der = brazo(1, violeta);
-  persona.add(izq.hombro, der.hombro);
-
-  apuntarBrazo(izq, MANO_SOSTIENE, GUIA_IZQ);
-  apuntarBrazo(der, new THREE.Vector3(0.335, 0.4, 0.075), new THREE.Vector3(1, -0.75, -0.45));
-
-  persona.traverse(function (o) {
-    if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
-  });
-
-  return { persona: persona, torso: torso, cabeza: cabeza, izq: izq, der: der };
-}
 
 /* ------------------------------------------------------------- claqueta -- */
 
@@ -671,8 +367,6 @@ function armarClaqueta(texPizarra) {
   frente.position.set(0, -ALTO_CL / 2, caraZ(FONDO_CL));
   claqueta.add(frente);
 
-  // La banda fija apoya sobre el canto de arriba de la pizarra. Hay que contar
-  // el bisel: cada pieza mide su alto nominal mas dos biseles.
   const banda = new THREE.Mesh(placa(ANCHO_CL, ALTO_BANDA, 0.012, 0.03), canto);
   banda.position.y = ALTO_BANDA / 2 + BISEL;
   claqueta.add(banda);
@@ -681,8 +375,6 @@ function armarClaqueta(texPizarra) {
   bandaCara.position.set(0, banda.position.y, caraZ(0.03));
   claqueta.add(bandaCara);
 
-  // El palo apoya sobre la banda, sin hueco: el tope de la banda es su centro
-  // mas medio alto mas un bisel.
   const topeBanda = banda.position.y + ALTO_BANDA / 2 + BISEL;
   const bisagra = new THREE.Group();
   bisagra.position.set(-ANCHO_CL / 2 + 0.022, topeBanda, 0);
@@ -709,13 +401,7 @@ function armarClaqueta(texPizarra) {
 
   claqueta.add(bisagra);
 
-  claqueta.traverse(function (o) {
-    if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
-  });
-
-  // Alto real de punta a punta, biseles incluidos: lo que hay que usar para
-  // encuadrarla sin que se salga por arriba.
-  const alto = ALTO_CL + 2 * BISEL + ALTO_BANDA + 2 * BISEL + ALTO_PALO + 2 * BISEL;
+  const alto = ALTO_CL + ALTO_BANDA + ALTO_PALO + 6 * BISEL;
   const arriba = topeBanda + ALTO_PALO + 2 * BISEL;
   const abajo = -ALTO_CL - BISEL;
 
@@ -737,46 +423,50 @@ export function montar(lienzoGL, opciones) {
   const renderer = new THREE.WebGLRenderer({ canvas: lienzoGL, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
-  // La sombra propia es lo que hunde los pliegues y despega los brazos del
-  // cuerpo. Sin esto, por mas redondo que sea, queda plano.
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMappingExposure = 1.06;
 
   const escena = new THREE.Scene();
   const camara = new THREE.PerspectiveCamera(32, 1, 0.05, 40);
 
-  escena.add(new THREE.HemisphereLight(0x93a6c4, 0x241f1b, 1.35));
-
-  const clave = new THREE.DirectionalLight(0xfff3e2, 2.5);
+  // Las luces son para la claqueta. El personaje trae la suya horneada.
+  escena.add(new THREE.HemisphereLight(0x93a6c4, 0x241f1b, 1.5));
+  const clave = new THREE.DirectionalLight(0xfff3e2, 2.4);
   clave.position.set(-2.1, 3.2, 2.9);
-  clave.castShadow = true;
-  clave.shadow.mapSize.set(1024, 1024);
-  clave.shadow.radius = 4;
-  clave.shadow.bias = -0.0012;
-  const sc = clave.shadow.camera;
-  sc.left = -1.8; sc.right = 1.8; sc.top = 2.4; sc.bottom = -0.6; sc.near = 0.5; sc.far = 10;
-  sc.updateProjectionMatrix();
   escena.add(clave);
-
-  const relleno = new THREE.DirectionalLight(0x9db9d8, 0.8);
+  const relleno = new THREE.DirectionalLight(0x9db9d8, 0.9);
   relleno.position.set(2.6, 1.1, 1.8);
   escena.add(relleno);
-
-  const contra = new THREE.DirectionalLight(0xc6daf5, 1.9);
+  const contra = new THREE.DirectionalLight(0xc6daf5, 1.6);
   contra.position.set(1.4, 2.1, -2.8);
   escena.add(contra);
 
-  const cuerpo = armarPersona();
   const texDatos = pizarraDatos();
   const habilidades = pizarraHabilidades();
   const cl = armarClaqueta(texDatos);
   const claqueta = cl.claqueta, bisagra = cl.bisagra;
-  escena.add(cuerpo.persona);
+  escena.add(claqueta);
 
-  const PERSONA_X = 0.44;
-  cuerpo.persona.position.set(PERSONA_X, -0.62, 0);
-  cuerpo.persona.rotation.y = -0.24;
+  // El personaje llega despues: son 1,1 MB y no tienen por que frenar a la
+  // claqueta, que ya se puede tocar.
+  const persona = new THREE.Group();
+  persona.visible = false;
+  escena.add(persona);
+
+  const PERSONA_X = 0.42;
+  persona.position.set(PERSONA_X, -1.28, 0);
+  persona.rotation.y = -0.2;
+
+  const cargador = new GLTFLoader();
+  cargador.setMeshoptDecoder(MeshoptDecoder);
+  let llegada = 0;
+  cargador.load(RUTA, function (g) {
+    persona.add(g.scene);
+    persona.visible = true;
+    llegada = performance.now();
+    arrancar();
+  }, undefined, function () {
+    // Si el modelo no llega, la ficha funciona igual: queda la claqueta sola.
+  });
 
   const aro = new THREE.Mesh(
     new THREE.TorusGeometry(0.37, 0.008, 6, 44),
@@ -785,7 +475,9 @@ export function montar(lienzoGL, opciones) {
   escena.add(aro);
 
   /* ---- encuadre ---- */
-  const MIRA = new THREE.Vector3(0.02, 0.12, 0);
+  // Retrato de tres cuartos: desde debajo de la rodilla hasta arriba de la
+  // cabeza, con la claqueta a la izquierda.
+  const MIRA = new THREE.Vector3(0.02, 0.02, 0);
   let angosto = false;
 
   function medir() {
@@ -794,9 +486,12 @@ export function montar(lienzoGL, opciones) {
     camara.aspect = w / h;
     const r = w / h;
     angosto = r < 1;
-    camara.position.set(0.05, 0.3, angosto ? 3.7 : 2.95 + (1.5 - Math.min(r, 1.5)) * 1.3);
+    camara.position.set(0.05, 0.12, angosto ? 2.95 : 2.32 + (1.5 - Math.min(r, 1.5)) * 1.05);
     camara.lookAt(MIRA);
     camara.updateProjectionMatrix();
+    // En vertical el cuadro es mas angosto y la claqueta se iba por el borde.
+    EN_REPOSO.x = angosto ? -0.28 : -0.37;
+    if (!abierta && !transicion && !vuelo && entrada >= 1) claqueta.position.x = EN_REPOSO.x;
     if (abierta && !transicion) {
       const f = encuadreAbierto();
       claqueta.position.copy(f.pos);
@@ -805,34 +500,21 @@ export function montar(lienzoGL, opciones) {
   }
 
   /* ---- donde va la claqueta ---- */
-  escena.updateMatrixWorld(true);
-
-  const soporte = new THREE.Group();
-  cuerpo.izq.mano.add(soporte);
-  soporte.quaternion.copy(cuerpo.izq.mano.getWorldQuaternion(new THREE.Quaternion())).invert();
-
-  const EN_PALMA = new THREE.Vector3(0.015, ALTO_CL + 0.07, 0.055);
-  const GIRO_PALMA = new THREE.Euler(-0.12, 0.24, 0.06);
+  // El modelo tiene las manos en los bolsillos y no trae esqueleto, asi que no
+  // la puede sostener: se posa a su lado y flota, que ademas le va bien a una
+  // pagina que es el sueno de una cinta.
+  const EN_REPOSO = new THREE.Vector3(-0.37, 0.31, 0.4);
+  // medir() las lee, y medir() corre antes de que se declaren mas abajo.
+  var abierta = false, transicion = null, vuelo = 0, entrada = quieto ? 1 : -1;
+  const GIRO_REPOSO = new THREE.Euler(-0.08, 0.26, 0.05);
   const FUERA = new THREE.Vector3(-3.6, 2, -0.6);
   const SIN_GIRO = new THREE.Euler(0, 0, 0);
 
-  const aux = new THREE.Vector3();
+  claqueta.position.copy(quieto ? EN_REPOSO : FUERA);
+  claqueta.rotation.copy(GIRO_REPOSO);
+  claqueta.visible = quieto;
 
-  function destinoMano() {
-    soporte.updateWorldMatrix(true, false);
-    return aux.copy(EN_PALMA).applyMatrix4(soporte.matrixWorld);
-  }
-
-  function colgarDeLaMano() {
-    soporte.add(claqueta);
-    claqueta.position.copy(EN_PALMA);
-    claqueta.rotation.copy(GIRO_PALMA);
-    claqueta.scale.set(1, 1, 1);
-  }
-
-  // Abierta ocupa casi el cuadro entero. La escala se calcula contra lo que se
-  // ve a esa distancia y con el alto REAL, biseles incluidos.
-  const Z_FRENTE = 1.35;
+  const Z_FRENTE = 1.3;
 
   function encuadreAbierto() {
     const d = camara.position.z - Z_FRENTE;
@@ -853,30 +535,13 @@ export function montar(lienzoGL, opciones) {
     };
   }
 
-  if (quieto) {
-    colgarDeLaMano();
-    claqueta.visible = true;
-  } else {
-    escena.add(claqueta);
-    claqueta.position.copy(FUERA);
-    claqueta.rotation.copy(GIRO_PALMA);
-    claqueta.visible = false;
-  }
-
-  const MANO_IZQ = MANO_SOSTIENE.clone();
-
   let vivo = true;
   let corriendo = false;
   let t = 0;
-  let abierta = false;
-  let faseEntrada = quieto ? 1 : -1;
   let giroLibre = new THREE.Vector3(0, 0, 0);
   let clap = 0;
   let escrito = false;
   let llenado = 0;
-  let transicion = null;
-  let golpe = 0;
-  let vuelo = 0;
 
   const reloj = new THREE.Clock();
   const observador = new ResizeObserver(medir);
@@ -886,42 +551,43 @@ export function montar(lienzoGL, opciones) {
   function bucle() {
     if (!vivo || !corriendo) return;
     requestAnimationFrame(bucle);
-    // dt solo mueve la respiracion, que no pasa nada si se atrasa; todo lo que
+    // dt solo mueve el balanceo, que no pasa nada si se atrasa; todo lo que
     // tiene que terminar en un momento dado va contra performance.now().
     t += Math.min(reloj.getDelta(), 0.05);
 
     if (vuelo) {
-      faseEntrada = Math.min(1, (performance.now() - vuelo) / 1600);
-      const k = frenar(faseEntrada);
-      claqueta.position.lerpVectors(FUERA, destinoMano(), k);
-      claqueta.position.y += Math.sin(faseEntrada * Math.PI) * 0.5;
+      entrada = Math.min(1, (performance.now() - vuelo) / 1600);
+      const k = frenar(entrada);
+      claqueta.position.lerpVectors(FUERA, EN_REPOSO, k);
+      claqueta.position.y += Math.sin(entrada * Math.PI) * 0.5;
       const resto = 1 - k;
       claqueta.rotation.set(
-        GIRO_PALMA.x + resto * giroLibre.x,
-        GIRO_PALMA.y + resto * giroLibre.y,
-        GIRO_PALMA.z + resto * giroLibre.z
+        GIRO_REPOSO.x + resto * giroLibre.x,
+        GIRO_REPOSO.y + resto * giroLibre.y,
+        GIRO_REPOSO.z + resto * giroLibre.z
       );
-      if (faseEntrada >= 1) { vuelo = 0; colgarDeLaMano(); golpe = performance.now(); }
+      if (entrada >= 1) vuelo = 0;
     }
 
-    if (golpe) {
-      const g = (performance.now() - golpe) / 420;
-      if (g >= 1) golpe = 0;
-      MANO_IZQ.copy(MANO_SOSTIENE);
-      MANO_IZQ.y -= Math.sin(Math.min(g, 1) * Math.PI) * 0.1;
-      apuntarBrazo(cuerpo.izq, MANO_IZQ, GUIA_IZQ);
+    // El personaje aparece con un fundido corto: aparecer de golpe se nota.
+    if (llegada) {
+      const p = Math.min(1, (performance.now() - llegada) / 700);
+      persona.position.z = (1 - p) * -0.35;
+      if (p >= 1) llegada = 0;
     }
 
     if (!quieto) {
-      const r = Math.sin(t * 1.3);
-      cuerpo.torso.scale.set(1 + r * 0.012, 1 - r * 0.009, 1 + r * 0.012);
-      cuerpo.cabeza.position.y = 1.15 + r * 0.009;
-      cuerpo.cabeza.rotation.set(
-        Math.sin(t * 0.58) * 0.035, Math.sin(t * 0.42) * 0.085, Math.sin(t * 0.5) * 0.025
-      );
+      // Balanceo: el modelo no tiene huesos, asi que respira el conjunto.
+      persona.position.y = -1.28 + Math.sin(t * 1.05) * 0.009;
+      persona.rotation.y = -0.2 + Math.sin(t * 0.47) * 0.035;
+      persona.rotation.z = Math.sin(t * 0.63) * 0.006;
+      if (!abierta && !transicion && !vuelo) {
+        claqueta.position.y = EN_REPOSO.y + Math.sin(t * 0.9) * 0.018;
+        claqueta.rotation.z = GIRO_REPOSO.z + Math.sin(t * 0.72) * 0.02;
+      }
     }
 
-    if (!abierta && faseEntrada >= 1 && !transicion) {
+    if (!abierta && entrada >= 1 && !transicion) {
       const ciclo = quieto ? 0.35 : (t * 0.62) % 1;
       claqueta.getWorldPosition(aro.position);
       aro.position.y -= ALTO_CL / 2;
@@ -943,17 +609,15 @@ export function montar(lienzoGL, opciones) {
         mezcla(transicion.giroDe.z, transicion.giroA.z, k)
       );
       claqueta.scale.setScalar(mezcla(transicion.escalaDe, transicion.escalaA, k));
+      // El personaje se corre y se va al fondo cuando la pizarra toma el cuadro.
       const fuera = transicion.abriendo ? k : 1 - k;
-      cuerpo.persona.position.x = PERSONA_X + fuera * (angosto ? 0.34 : 0.95);
-      cuerpo.persona.position.z = -fuera * 1.35;
-      if (transicion.k >= 1) {
-        if (transicion.alaMano) colgarDeLaMano();
-        transicion = null;
-      }
+      persona.position.x = PERSONA_X + fuera * (angosto ? 0.34 : 0.72);
+      persona.position.z = -fuera * 1.8;
+      if (transicion.k >= 1) transicion = null;
     }
 
     // El palo: sube, baja de golpe y queda vibrando un instante. En el golpe
-    // la pizarra se reescribe: es el momento en que la claqueta "dice" algo.
+    // la pizarra se reescribe: es el momento en que la claqueta dice algo.
     if (clap) {
       const k = Math.min(1, (performance.now() - clap) / 340);
       let a;
@@ -970,8 +634,6 @@ export function montar(lienzoGL, opciones) {
       if (k >= 1) { clap = 0; bisagra.rotation.z = 0; }
     }
 
-    // Las barras se llenan de a una. Solo se repintan los segmentos, no la
-    // pizarra entera.
     if (llenado) {
       const p = Math.min(1, (performance.now() - llenado) / 1300);
       habilidades.dibujar(p);
@@ -991,9 +653,9 @@ export function montar(lienzoGL, opciones) {
   function parar() { corriendo = false; }
 
   function entrar() {
-    if (faseEntrada >= 0) return false;
+    if (entrada >= 0) return false;
     claqueta.visible = true;
-    faseEntrada = 0;
+    entrada = 0;
     vuelo = performance.now();
     giroLibre = new THREE.Vector3(Math.PI * 2.4, Math.PI * 3.6, Math.PI * 1.8);
     arrancar();
@@ -1004,10 +666,9 @@ export function montar(lienzoGL, opciones) {
     if (abierta) return;
     abierta = true;
     clap = performance.now();
-    escena.attach(claqueta);
     const fin = encuadreAbierto();
     transicion = {
-      k: 0, inicio: performance.now(), dur: 900, abriendo: true, alaMano: false,
+      k: 0, inicio: performance.now(), dur: 900, abriendo: true,
       de: claqueta.position.clone(), a: fin.pos,
       giroDe: claqueta.rotation.clone(), giroA: SIN_GIRO,
       escalaDe: claqueta.scale.x, escalaA: fin.escala
@@ -1018,16 +679,16 @@ export function montar(lienzoGL, opciones) {
   function cerrar() {
     if (!abierta) return;
     abierta = false;
-    // Al volver a la mano, la pizarra vuelve a mostrar los datos de rodaje.
+    // Al volver, la pizarra muestra otra vez los datos de rodaje.
     escrito = false;
     llenado = 0;
     cl.cara.map = texDatos;
     cl.cara.needsUpdate = true;
     habilidades.dibujar(0);
     transicion = {
-      k: 0, inicio: performance.now(), dur: 720, abriendo: false, alaMano: true,
-      de: claqueta.position.clone(), a: destinoMano().clone(),
-      giroDe: claqueta.rotation.clone(), giroA: GIRO_PALMA,
+      k: 0, inicio: performance.now(), dur: 720, abriendo: false,
+      de: claqueta.position.clone(), a: EN_REPOSO.clone(),
+      giroDe: claqueta.rotation.clone(), giroA: GIRO_REPOSO,
       escalaDe: claqueta.scale.x, escalaA: 1
     };
     arrancar();
