@@ -6,3 +6,9 @@ qa/
 *.log
 
 .vercel
+
+# Internos y personales: no publicar
+SOURCES.md
+HANDOFF.md
+CV_*.docx
+CV_*.pdf
